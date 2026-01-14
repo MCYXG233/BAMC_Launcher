@@ -41,8 +41,8 @@
 
 1. **克隆仓库**
    ```bash
-git clone https://github.com/yourusername/BAMCLauncher.git
-cd BAMCLauncher
+git clone https://github.com/MCYXG233/BAMC_Launcher.git
+cd BAMC_Launcher
    ```
 
 2. **安装依赖**
@@ -189,8 +189,8 @@ MIT许可证是一种宽松的开源许可证，允许：
 
 ## 📞 联系方式
 
-- **项目地址**：https://github.com/yourusername/BAMCLauncher
-- **Issues**：https://github.com/yourusername/BAMCLauncher/issues
+- **项目地址**：https://github.com/MCYXG233/BAMC_Launcher
+- **Issues**：https://github.com/MCYXG233/BAMC_Launcher/issues
 
 ## 📝 更新日志
 
