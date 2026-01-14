@@ -104,8 +104,7 @@ flutter build linux
 
 ### 项目结构
 ```
-bamclauncher/
-├── lib/
+├── lib/                 # 主要源代码
 │   ├── components/      # UI组件
 │   ├── models/          # 数据模型
 │   ├── services/        # 服务层
@@ -115,6 +114,8 @@ bamclauncher/
 │   └── main.dart        # 应用入口
 ├── test/                # 测试代码
 ├── pubspec.yaml         # 依赖配置
+├── pubspec.lock         # 依赖锁定文件
+├── LICENSE              # MIT许可证
 └── README.md            # 项目文档
 ```
 
