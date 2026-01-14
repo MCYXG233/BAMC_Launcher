@@ -1,0 +1,50 @@
+name: bamclauncher
+description: A lightweight cross-platform Minecraft launcher with Blue Archive theme
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  dio: ^5.4.0
+  path_provider: ^2.1.1
+  permission_handler: ^11.3.0
+  encrypt: ^5.0.3
+  archive: ^3.4.9
+  sqflite: ^2.3.0
+  workmanager: ^0.5.1
+  provider: ^6.1.1
+  flutter_riverpod: ^2.4.9
+  url_launcher: ^6.2.5
+  shared_preferences: ^2.2.2
+  fluttertoast: ^8.2.4
+  intl: ^0.18.1
+  logger: ^2.0.2+1
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  file_picker: ^8.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.7
+  freezed: ^2.4.5
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/themes/
+    - assets/lang/
+  fonts:
+    - family: NotoSansSC
+      fonts:
+        - asset: assets/fonts/NotoSansSC-Regular.otf
+        - asset: assets/fonts/NotoSansSC-Bold.otf
+          weight: 700
