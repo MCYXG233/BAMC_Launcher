@@ -40,18 +40,18 @@
 ### 编译安装
 
 1. **克隆仓库**
-   ```bash
+```bash
 git clone https://github.com/MCYXG233/BAMC_Launcher.git
 cd BAMC_Launcher
-   ```
+```
 
 2. **安装依赖**
-   ```bash
+```bash
 flutter pub get
-   ```
+```
 
 3. **编译运行**
-   ```bash
+```bash
 # Windows
 flutter run -d windows
 
@@ -60,10 +60,10 @@ flutter run -d macos
 
 # Linux
 flutter run -d linux
-   ```
+```
 
 4. **构建发布版本**
-   ```bash
+```bash
 # Windows
 flutter build windows
 
@@ -72,7 +72,7 @@ flutter build macos
 
 # Linux
 flutter build linux
-   ```
+```
 
 ## 📖 使用说明
 
