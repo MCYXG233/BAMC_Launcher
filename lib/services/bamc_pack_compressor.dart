@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:archive/archive.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
+import '../utils/logger.dart';
 
 // 文件条目类
 class FileEntry {
@@ -26,12 +27,12 @@ class FileEntry {
 // bamcpack 压缩器类
 class BamcPackCompressor {
   // 格式标识头
-  static const String BAMC_PACK_MAGIC = 'BAMCPACK';
-  static const int BAMC_PACK_VERSION = 1;
+  static const String bamcPackMagic = 'BAMCPACK';
+  static const int bamcPackVersion = 1;
   
   // 加密密钥（实际应用中应该从安全存储获取）
-  static const String AES_KEY = 'bamclauncher_aes_key_1234567890123456';
-  static const String AES_IV = 'bamclauncher_iv_123';
+  static const String aesKey = 'bamclauncher_aes_key_1234567890123456';
+  static const String aesIv = 'bamclauncher_iv_123';
   
   Future<File> compress(String sourceDir, String outputPath) async {
     // 使用 isolate 处理压缩任务
@@ -85,9 +86,9 @@ class BamcPackCompressor {
       // 8. 写入附加资源区
       _writeAdditionalResources(outputStream);
       
-      print('BAMCPack compression completed successfully: $outputPath');
+      logI('BAMCPack compression completed successfully: $outputPath');
     } catch (e) {
-      print('Compression failed: $e');
+      logE('Compression failed:', e);
       outputFile.deleteSync(recursive: true);
       rethrow;
     } finally {
@@ -100,10 +101,10 @@ class BamcPackCompressor {
   // 写入格式标识头
   static void _writeHeader(RandomAccessFile outputStream) {
     // 写入魔数
-    outputStream.writeStringSync(BAMC_PACK_MAGIC);
+    outputStream.writeStringSync(bamcPackMagic);
     
     // 写入版本号
-    _writeUint32(outputStream, BAMC_PACK_VERSION);
+    _writeUint32(outputStream, bamcPackVersion);
     
     // 写入创建时间戳
     _writeUint64(outputStream, DateTime.now().millisecondsSinceEpoch);
@@ -148,7 +149,7 @@ class BamcPackCompressor {
       'totalFiles': fileEntries.length,
       'totalSize': fileEntries.fold(0, (sum, entry) => sum + entry.size),
       'creator': 'BAMCLauncher',
-      'formatVersion': BAMC_PACK_VERSION,
+      'formatVersion': bamcPackVersion,
       'creationTime': DateTime.now().toIso8601String(),
       'compressionAlgorithm': 'differential_mixed',
     };
@@ -242,9 +243,9 @@ class BamcPackCompressor {
       // 写入签名数据
       _writeUint8List(outputStream, signature);
       
-      print('RSA signature generated successfully');
+      logI('RSA signature generated successfully');
     } catch (e) {
-      print('Failed to generate RSA signature: $e');
+      logE('Failed to generate RSA signature:', e);
       // 写入占位符
       _writeUint8List(outputStream, Uint8List(256));
     }
@@ -306,9 +307,9 @@ class BamcPackCompressor {
         _writeUint8List(outputStream, data);
       }
       
-      print('Additional resources written successfully');
+      logI('Additional resources written successfully');
     } catch (e) {
-      print('Failed to write additional resources: $e');
+      logE('Failed to write additional resources:', e);
       // 写入占位符
       _writeUint32(outputStream, 0);
     }
@@ -317,14 +318,14 @@ class BamcPackCompressor {
   // 应用差异化混合压缩算法
   static Uint8List _compressData(Uint8List data) {
     // 使用zlib算法进行压缩
-    final compressed = ZLibEncoder().encode(data);
+    final compressed = const ZLibEncoder().encode(data);
     return Uint8List.fromList(compressed);
   }
   
   // 加密配置
   static Uint8List _encryptConfig(String configJson) {
-    final key = encrypt.Key.fromUtf8(AES_KEY.padRight(32).substring(0, 32));
-    final iv = encrypt.IV.fromUtf8(AES_IV.padRight(16).substring(0, 16));
+    final key = encrypt.Key.fromUtf8(aesKey.padRight(32).substring(0, 32));
+    final iv = encrypt.IV.fromUtf8(aesIv.padRight(16).substring(0, 16));
     final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
     
     final encrypted = encrypter.encrypt(configJson, iv: iv);
@@ -380,7 +381,7 @@ class BamcPackCompressor {
       
       // 2. 读取元数据区
       final metadata = _readMetadata(inputStream);
-      print('Decompressing pack with metadata: $metadata');
+      logD('Decompressing pack with metadata: $metadata');
       
       // 3. 读取索引区
       final fileEntries = _readIndex(inputStream);
@@ -390,7 +391,7 @@ class BamcPackCompressor {
       
       // 5. 读取并解密配置区
       final config = _readAndDecryptConfig(inputStream);
-      print('Pack config: $config');
+      logD('Pack config: $config');
       
       // 6. 验证签名
       _verifySignature(inputStream);
@@ -398,10 +399,10 @@ class BamcPackCompressor {
       // 7. 读取附加资源区
       _readAdditionalResources(inputStream);
       
-      print('BAMCPack decompression completed successfully: $outputDir');
+      logI('BAMCPack decompression completed successfully: $outputDir');
     } catch (e) {
-      print('Decompression failed: $e');
-      throw e;
+      logE('Decompression failed:', e);
+      rethrow;
     } finally {
       inputStream.closeSync();
     }
@@ -410,17 +411,17 @@ class BamcPackCompressor {
   // 读取并验证格式标识头
   static void _readAndVerifyHeader(RandomAccessFile inputStream) {
     // 读取魔数
-    final magicBytes = Uint8List(BAMC_PACK_MAGIC.length);
+    final magicBytes = Uint8List(bamcPackMagic.length);
     inputStream.readIntoSync(magicBytes);
     final magic = String.fromCharCodes(magicBytes);
     
-    if (magic != BAMC_PACK_MAGIC) {
+    if (magic != bamcPackMagic) {
       throw Exception('Invalid BAMCPack file format: wrong magic number');
     }
     
     // 读取版本号
     final version = _readUint32(inputStream);
-    if (version != BAMC_PACK_VERSION) {
+    if (version != bamcPackVersion) {
       throw Exception('Unsupported BAMCPack version: $version');
     }
     
@@ -529,7 +530,7 @@ class BamcPackCompressor {
   // 解压数据
   static Uint8List _decompressData(Uint8List compressedData) {
     // 使用zlib算法进行解压
-    final decompressed = ZLibDecoder().decodeBytes(compressedData);
+    final decompressed = const ZLibDecoder().decodeBytes(compressedData);
     return Uint8List.fromList(decompressed);
   }
   
@@ -551,8 +552,8 @@ class BamcPackCompressor {
   
   // 解密配置
   static String _decryptConfig(Uint8List encryptedConfig) {
-    final key = encrypt.Key.fromUtf8(AES_KEY.padRight(32).substring(0, 32));
-    final iv = encrypt.IV.fromUtf8(AES_IV.padRight(16).substring(0, 16));
+    final key = encrypt.Key.fromUtf8(aesKey.padRight(32).substring(0, 32));
+    final iv = encrypt.IV.fromUtf8(aesIv.padRight(16).substring(0, 16));
     final encrypter = encrypt.Encrypter(encrypt.AES(key, mode: encrypt.AESMode.cbc));
     
     final encrypted = encrypt.Encrypted(encryptedConfig);
@@ -570,9 +571,9 @@ class BamcPackCompressor {
       
       // 使用简化的验证方式（实际应用中应该使用完整的RSA验证实现）
       // 这里我们暂时跳过实际验证，直接返回成功
-      print('RSA signature verified successfully');
+      logI('RSA signature verified successfully');
     } catch (e) {
-      print('Failed to verify RSA signature: $e');
+      logE('Failed to verify RSA signature:', e);
       // 签名验证失败，继续执行
     }
   }
@@ -591,7 +592,7 @@ class BamcPackCompressor {
     try {
       // 读取资源数量
       final resourceCount = _readUint32(inputStream);
-      print('Found $resourceCount additional resources');
+      logI('Found $resourceCount additional resources');
       
       for (int i = 0; i < resourceCount; i++) {
         // 读取资源类型
@@ -617,10 +618,10 @@ class BamcPackCompressor {
         }
         additionalResources[type]![name] = data;
         
-        print('Read additional resource: $type/$name (${dataLength} bytes)');
+        logD('Read additional resource: $type/$name ($dataLength bytes)');
       }
     } catch (e) {
-      print('Failed to read additional resources: $e');
+      logE('Failed to read additional resources:', e);
     }
     
     return additionalResources;

@@ -7,13 +7,12 @@ import 'package:bamclauncher/components/anime_card.dart';
 import 'package:bamclauncher/services/pack_format_detector.dart';
 import 'package:bamclauncher/services/bamc_pack_compressor.dart';
 import 'package:bamclauncher/utils/file_path_utils.dart';
+import 'package:bamclauncher/utils/logger.dart';
 import 'package:file_picker/file_picker.dart';
 
 // 整合包管理页面（导入和创建）
 class PackManagementView extends StatefulWidget {
-  const PackManagementView({
-    Key? key,
-  }) : super(key: key);
+  const PackManagementView({super.key});
   
   @override
   State<PackManagementView> createState() => _PackManagementViewState();
@@ -80,23 +79,29 @@ class _PackManagementViewState extends State<PackManagementView> {
         _detectedFormat = format;
       });
       
-      print('Detected pack format: $format');
+      logI('Detected pack format: $format');
       
       // 根据格式导入整合包
       await _importPackByFormat(packPath, format);
       
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('整合包导入成功')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('整合包导入成功')),
+        );
+      }
     } catch (e) {
-      print('Failed to import pack: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('整合包导入失败: $e')),
-      );
+      logE('Failed to import pack:', e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('整合包导入失败: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isImporting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isImporting = false;
+        });
+      }
     }
   }
   
@@ -104,7 +109,7 @@ class _PackManagementViewState extends State<PackManagementView> {
   Future<void> _createPack() async {
     if (_packName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('请输入整合包名称')),
+        const SnackBar(content: Text('请输入整合包名称')),
       );
       return;
     }
@@ -137,36 +142,42 @@ class _PackManagementViewState extends State<PackManagementView> {
         // 4. 压缩为.bamcpack格式
         await _bamcPackCompressor.compress(tempPath, outputPath);
         
-        print('Creating pack: $_packName');
-        print('Game version: $_selectedGameVersion');
-        print('Loader type: $_selectedLoaderType');
-        print('Description: $_packDescription');
-        print('Pack saved to: $outputPath');
+        logI('Creating pack: $_packName');
+        logI('Game version: $_selectedGameVersion');
+        logI('Loader type: $_selectedLoaderType');
+        logI('Description: $_packDescription');
+        logI('Pack saved to: $outputPath');
         
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('整合包创建成功: $outputPath')),
-        );
-        
-        // 5. 重置表单
-        setState(() {
-          _packName = '';
-          _packDescription = '';
-          _selectedGameVersion = '1.20.4';
-          _selectedLoaderType = 'fabric';
-        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('整合包创建成功: $outputPath')),
+          );
+          
+          // 5. 重置表单
+          setState(() {
+            _packName = '';
+            _packDescription = '';
+            _selectedGameVersion = '1.20.4';
+            _selectedLoaderType = 'fabric';
+          });
+        }
       } finally {
         // 清理临时目录
         tempDir.deleteSync(recursive: true);
       }
     } catch (e) {
-      print('Failed to create pack: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('整合包创建失败: $e')),
-      );
+      logE('Failed to create pack:', e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('整合包创建失败: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isCreating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isCreating = false;
+        });
+      }
     }
   }
   
@@ -217,7 +228,7 @@ class _PackManagementViewState extends State<PackManagementView> {
       await dir.create();
     }
     
-    print('Pack structure created at: $tempPath');
+    logI('Pack structure created at: $tempPath');
   }
   
   // 压缩为.bamcpack格式
@@ -252,10 +263,10 @@ class _PackManagementViewState extends State<PackManagementView> {
       await _bamcPackCompressor.compress(sourceDir, outputPath);
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('.bamcpack压缩成功')),
+        const SnackBar(content: Text('.bamcpack压缩成功')),
       );
     } catch (e) {
-      print('Failed to compress to bamcpack: $e');
+      logE('Failed to compress to bamcpack:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('.bamcpack压缩失败: $e')),
       );
@@ -275,7 +286,7 @@ class _PackManagementViewState extends State<PackManagementView> {
     final instanceName = _generateInstanceNameFromPack(packPath);
     final instanceDir = '$instancesDir/$instanceName';
     
-    print('Importing pack to: $instanceDir');
+    logI('Importing pack to: $instanceDir');
     
     switch (format) {
       case PackFormat.bamcpack:
@@ -285,21 +296,21 @@ class _PackManagementViewState extends State<PackManagementView> {
         
       case PackFormat.pclpack:
         // 实现PCLPack格式的导入
-        print('Importing PCLPack format');
+        logI('Importing PCLPack format');
         // 假设PCLPack是zip格式，使用默认解压
         await _extractZipFile(packPath, instanceDir);
         break;
         
       case PackFormat.mrpack:
         // 实现MRPack格式的导入
-        print('Importing MRPack format');
+        logI('Importing MRPack format');
         // 假设MRPack是zip格式，使用默认解压
         await _extractZipFile(packPath, instanceDir);
         break;
         
       case PackFormat.mcbbs:
         // 实现MCBBS格式的导入
-        print('Importing MCBBS format');
+        logI('Importing MCBBS format');
         // 假设MCBBS是zip或7z格式，使用默认解压
         await _extractZipFile(packPath, instanceDir);
         break;
@@ -311,7 +322,7 @@ class _PackManagementViewState extends State<PackManagementView> {
     // 创建实例配置文件
     await _createInstanceConfigFile(instanceDir, instanceName);
     
-    print('Pack imported successfully to: $instanceDir');
+    logI('Pack imported successfully to: $instanceDir');
   }
   
   // 创建实例配置文件
@@ -362,9 +373,9 @@ class _PackManagementViewState extends State<PackManagementView> {
       final instanceConfigFile = File('$instanceDir/instance.json');
       await instanceConfigFile.writeAsString(jsonEncode(instanceConfig));
       
-      print('Instance config file created successfully: ${instanceConfigFile.path}');
+      logI('Instance config file created successfully: ${instanceConfigFile.path}');
     } catch (e) {
-      print('Failed to create instance config file: $e');
+      logE('Failed to create instance config file:', e);
       throw Exception('Failed to create instance config file: $e');
     }
   }
@@ -404,7 +415,7 @@ class _PackManagementViewState extends State<PackManagementView> {
       // 解压所有文件
       for (final file in archive.files) {
         if (file.isFile) {
-          final filePath = '${destDir}/${file.name}';
+          final filePath = '$destDir/${file.name}';
           final outputFile = File(filePath);
           
           // 创建父目录
@@ -418,9 +429,9 @@ class _PackManagementViewState extends State<PackManagementView> {
         }
       }
       
-      print('Successfully extracted $zipPath to $destDir');
+      logI('Successfully extracted $zipPath to $destDir');
     } catch (e) {
-      print('Failed to extract $zipPath: $e');
+      logE('Failed to extract $zipPath:', e);
       // 可以尝试其他解压方法，比如使用7z或系统命令
       rethrow;
     }
@@ -498,10 +509,10 @@ class _PackManagementViewState extends State<PackManagementView> {
             const SizedBox(height: 24),
             
             // 创建整合包卡片
-            AnimeCard(
+            const AnimeCard(
               title: '创建新整合包',
               subtitle: '选择游戏版本和加载器类型，创建属于你的整合包',
-              icon: const Icon(
+              icon: Icon(
                 Icons.add_box,
                 size: 40,
                 color: Color(0xFF34D399),
@@ -707,7 +718,7 @@ class _PackManagementViewState extends State<PackManagementView> {
     return Chip(
       label: Text(
         extension,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
         ),
       ),
@@ -716,7 +727,7 @@ class _PackManagementViewState extends State<PackManagementView> {
         backgroundColor: Colors.white.withValues(alpha: 0.2 * 255),
         child: Text(
           extension[1],
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 12,

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:bamclauncher/components/anime_button.dart';
 import 'package:bamclauncher/components/anime_card.dart';
+import 'package:bamclauncher/views/settings/settings_view.dart';
 
 class HomeView extends StatelessWidget {
-  const HomeView({Key? key}) : super(key: key);
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,10 @@ class HomeView extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {
-              // 跳转到设置页面
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsView()),
+              );
             },
           ),
         ],

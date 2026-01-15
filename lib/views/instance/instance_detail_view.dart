@@ -4,6 +4,7 @@ import 'package:bamclauncher/components/anime_button.dart';
 import 'package:bamclauncher/components/anime_card.dart';
 import 'package:bamclauncher/models/instance_model.dart';
 import 'package:bamclauncher/services/instance_manager.dart';
+import 'package:bamclauncher/utils/logger.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:archive/archive.dart';
 
@@ -12,9 +13,9 @@ class InstanceDetailView extends StatefulWidget {
   final String instanceId;
   
   const InstanceDetailView({
-    Key? key,
+    super.key,
     required this.instanceId,
-  }) : super(key: key);
+  });
   
   @override
   State<InstanceDetailView> createState() => _InstanceDetailViewState();
@@ -40,18 +41,24 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
     
     try {
       final instance = await _instanceManager.getInstance(widget.instanceId);
-      setState(() {
-        _instance = instance;
-      });
+      if (mounted) {
+        setState(() {
+          _instance = instance;
+        });
+      }
     } catch (e) {
-      print('Failed to load instance: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('加载实例失败: $e')),
-      );
+      logE('Failed to load instance:', e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('加载实例失败: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
   
@@ -65,18 +72,24 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
     
     try {
       await _instanceManager.launchInstance(_instance!);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('实例启动成功')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('实例启动成功')),
+        );
+      }
     } catch (e) {
-      print('Failed to launch instance: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('启动实例失败: $e')),
-      );
+      logE('Failed to launch instance:', e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('启动实例失败: $e')),
+        );
+      }
     } finally {
-      setState(() {
-        _isLaunching = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLaunching = false;
+        });
+      }
     }
   }
   
@@ -110,15 +123,19 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
     if (confirm == true) {
       try {
         await _instanceManager.deleteInstance(widget.instanceId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('实例删除成功')),
-        );
-        Navigator.pop(context);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('实例删除成功')),
+          );
+          Navigator.pop(context);
+        }
       } catch (e) {
-        print('Failed to delete instance: $e');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('删除实例失败: $e')),
-        );
+        logE('Failed to delete instance:', e);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('删除实例失败: $e')),
+          );
+        }
       }
     }
   }
@@ -228,10 +245,10 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
         await _loadInstance();
         
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('实例更新成功')),
+          const SnackBar(content: Text('实例更新成功')),
         );
       } catch (e) {
-        print('Failed to update instance: $e');
+        logE('Failed to update instance:', e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('更新实例失败: $e')),
         );
@@ -311,7 +328,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
       
       // 6. 验证备份文件是否创建成功
       if (zipFile.existsSync()) {
-        print('实例备份成功: ${zipFile.path}');
+        logI('实例备份成功: ${zipFile.path}');
       } else {
         throw Exception('备份文件创建失败');
       }
@@ -320,7 +337,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
         SnackBar(content: Text('备份成功: $backupName')),
       );
     } catch (e) {
-      print('备份实例失败: $e');
+      logE('备份实例失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('备份失败: $e')),
       );
@@ -362,7 +379,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
           await sourceFile.copy(destFile.path);
           successCount++;
         } catch (e) {
-          print('复制Mod失败: ${file.name}, 错误: $e');
+          logE('复制Mod失败: ${file.name}', e);
           failCount++;
         }
       }
@@ -374,7 +391,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
         ),
       );
     } catch (e) {
-      print('导入Mod失败: $e');
+      logE('导入Mod失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('导入Mod失败: $e')),
       );
@@ -434,13 +451,13 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
             });
             
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Java配置已更新')),
+              const SnackBar(content: Text('Java配置已更新')),
             );
           },
         ),
       );
     } catch (e) {
-      print('配置Java失败: $e');
+      logE('配置Java失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('配置Java失败: $e')),
       );
@@ -481,7 +498,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
       for (final path in commonPaths) {
         final javaDir = Directory(path);
         if (javaDir.existsSync()) {
-          final subDirs = javaDir.listSync().where((dir) => dir is Directory).toList();
+          final subDirs = javaDir.listSync().whereType<Directory>().toList();
           for (final subDir in subDirs) {
             final javaExec = Platform.isWindows
                 ? '${subDir.path}\\bin\\java.exe'
@@ -508,7 +525,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
         }
       }
     } catch (e) {
-      print('检测Java版本失败: $e');
+      logE('检测Java版本失败:', e);
     }
     
     return javaVersions;
@@ -542,10 +559,10 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
       }
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('已打开实例文件夹')),
+        const SnackBar(content: Text('已打开实例文件夹')),
       );
     } catch (e) {
-      print('打开实例文件夹失败: $e');
+      logE('打开实例文件夹失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('打开实例文件夹失败: $e')),
       );
@@ -624,7 +641,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
           SnackBar(content: Text('内存设置已更新为 $newMemory MB')),
         );
       } catch (e) {
-        print('修改内存设置失败: $e');
+        logE('修改内存设置失败:', e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('修改内存设置失败: $e')),
         );
@@ -667,9 +684,12 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
       );
     }
     
+    // 使用局部变量避免重复的非空断言
+    final instance = _instance!;
+    
     return Scaffold(
       appBar: AppBar(
-        title: Text(_instance!.name),
+        title: Text(instance.name),
         actions: [
             IconButton(
               icon: const Icon(Icons.edit),
@@ -688,10 +708,10 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 实例基本信息卡片
-            AnimeCard(
+            const AnimeCard(
               title: '基本信息',
               subtitle: '',
-              icon: const Icon(
+              icon: Icon(
                 Icons.info_outline,
                 size: 40,
                 color: Color(0xFF3B82F6),
@@ -782,7 +802,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
             // 实例文件夹信息
             AnimeCard(
               title: '实例文件夹',
-              subtitle: _instance!.instanceDir,
+              subtitle: instance.instanceDir,
               icon: const Icon(
                 Icons.folder,
                 size: 40,
@@ -795,7 +815,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
             // 版本信息
             AnimeCard(
               title: '版本信息',
-              subtitle: 'Minecraft ${_instance!.minecraftVersion} - ${_instance!.loaderType} ${_instance!.loaderVersion}',
+              subtitle: 'Minecraft ${instance.minecraftVersion} - ${instance.loaderType} ${instance.loaderVersion}',
               icon: const Icon(
                 Icons.code,
                 size: 40,
@@ -808,7 +828,7 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
             // 内存设置
             AnimeCard(
               title: '内存设置',
-              subtitle: '分配内存: ${_instance!.allocatedMemory}MB',
+              subtitle: '分配内存: ${instance.allocatedMemory}MB',
               icon: const Icon(
                 Icons.memory,
                 size: 40,
@@ -909,11 +929,11 @@ class JavaConfigurationDialog extends StatefulWidget {
   final Function(String) onSave;
   
   const JavaConfigurationDialog({
-    Key? key,
+    super.key,
     required this.instance,
     required this.detectedJavaVersions,
     required this.onSave,
-  }) : super(key: key);
+  });
   
   @override
   State<JavaConfigurationDialog> createState() => _JavaConfigurationDialogState();
@@ -1000,7 +1020,9 @@ class _JavaConfigurationDialogState extends State<JavaConfigurationDialog> {
                                 style: const TextStyle(color: Colors.white70, fontSize: 12),
                               ),
                               value: java['path'] ?? '',
+                              // ignore: deprecated_member_use
                               groupValue: _selectedJavaPath,
+                              // ignore: deprecated_member_use
                               onChanged: (value) {
                                 if (value != null) {
                                   setState(() {
@@ -1091,11 +1113,11 @@ class _JavaConfigurationDialogState extends State<JavaConfigurationDialog> {
                       widget.onSave(_selectedJavaPath);
                       Navigator.pop(context);
                     },
-                    child: const Text('保存'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF667eea),
                       foregroundColor: Colors.white,
                     ),
+                    child: const Text('保存'),
                   ),
                 ],
               ),
@@ -1121,7 +1143,7 @@ class _JavaConfigurationDialogState extends State<JavaConfigurationDialog> {
         });
       }
     } catch (e) {
-      print('选择Java路径失败: $e');
+      logE('选择Java路径失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('选择Java路径失败: $e')),
       );
@@ -1135,10 +1157,10 @@ class ResourcePackManagementDialog extends StatefulWidget {
   final List<File> resourcepacks;
   
   const ResourcePackManagementDialog({
-    Key? key,
+    super.key,
     required this.instance,
     required this.resourcepacks,
-  }) : super(key: key);
+  });
   
   @override
   State<ResourcePackManagementDialog> createState() => _ResourcePackManagementDialogState();
@@ -1297,7 +1319,7 @@ class _ResourcePackManagementDialogState extends State<ResourcePackManagementDia
             _resourcepacks.add(destFile);
           });
         } catch (e) {
-          print('复制资源包失败: ${file.name}, 错误: $e');
+          logE('复制资源包失败: ${file.name}', e);
         }
       }
       
@@ -1308,7 +1330,7 @@ class _ResourcePackManagementDialogState extends State<ResourcePackManagementDia
         );
       }
     } catch (e) {
-      print('添加资源包失败: $e');
+      logE('添加资源包失败:', e);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('添加资源包失败: $e')),
       );
@@ -1344,7 +1366,7 @@ class _ResourcePackManagementDialogState extends State<ResourcePackManagementDia
                   SnackBar(content: Text('资源包 "$fileName" 已删除')),
                 );
               } catch (e) {
-                print('删除资源包失败: $e');
+                logE('删除资源包失败:', e);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('删除资源包失败: $e')),
                 );

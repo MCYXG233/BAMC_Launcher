@@ -60,7 +60,7 @@ class _LoginViewState extends State<LoginView> {
                   padding: const EdgeInsets.all(12),
                   margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(25, 229, 57, 53), // 0xFFE53935 with 0.1 opacity
+                    color: const Color.fromARGB(25, 229, 57, 53), // 0xFFE53935 with 0.1 opacity
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFFE53935)),
                   ),
@@ -103,19 +103,19 @@ class _LoginViewState extends State<LoginView> {
               // 离线模式按钮
               OutlinedButton(
                 onPressed: _isLoading ? null : _loginOffline,
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Colors.white),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 child: const Text(
                   '离线模式',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
                   ),
                 ),
               ),
@@ -147,22 +147,28 @@ class _LoginViewState extends State<LoginView> {
     try {
       final result = await _authService.loginWithMicrosoft();
       
-      if (result['success']) {
-        // 登录成功，返回上一页
-        Navigator.pop(context, result);
-      } else {
-        setState(() {
-          _errorMessage = '登录失败，请重试';
-        });
+      if (mounted) {
+        if (result['success']) {
+          // 登录成功，返回上一页
+          Navigator.pop(context, result);
+        } else {
+          setState(() {
+            _errorMessage = '登录失败，请重试';
+          });
+        }
       }
     } catch (e) {
-      setState(() {
-        _errorMessage = '登录失败: $e';
-      });
+      if (mounted) {
+        setState(() {
+          _errorMessage = '登录失败: $e';
+        });
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
   

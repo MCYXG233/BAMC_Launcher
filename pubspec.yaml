@@ -27,6 +27,7 @@ dependencies:
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
   file_picker: ^8.0.3
+  get_it: ^7.6.4
 
 dev_dependencies:
   flutter_test:
@@ -42,9 +43,3 @@ flutter:
     - assets/images/
     - assets/themes/
     - assets/lang/
-  fonts:
-    - family: NotoSansSC
-      fonts:
-        - asset: assets/fonts/NotoSansSC-Regular.otf
-        - asset: assets/fonts/NotoSansSC-Bold.otf
-          weight: 700

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import './logger.dart';
 
 // 跨平台文件路径工具类
 class FilePathUtils {
@@ -56,7 +57,7 @@ class FilePathUtils {
       
       return toCrossPlatformPath(appDir.path);
     } catch (e) {
-      print('Failed to get app data directory: $e');
+      logE('Failed to get app data directory:', e);
       // 回退到当前工作目录
       final fallbackDir = Directory('.bamclauncher');
       if (!fallbackDir.existsSync()) {
@@ -138,7 +139,7 @@ class FilePathUtils {
       
       return toCrossPlatformPath(bamcTempDir.path);
     } catch (e) {
-      print('Failed to get temp directory: $e');
+      logE('Failed to get temp directory:', e);
       // 回退到系统临时目录
       final systemTemp = Directory.systemTemp;
       final bamcTempDir = Directory('${systemTemp.path}/BAMCLauncher');
@@ -173,7 +174,7 @@ class FilePathUtils {
         try {
           await Process.run('chmod', ['+x', filePath]);
         } catch (e) {
-          print('Failed to fix permissions for $filePath: $e');
+          logE('Failed to fix permissions for $filePath:', e);
         }
       }
     }
@@ -187,7 +188,7 @@ class FilePathUtils {
         try {
           await Process.run('chmod', ['-R', '755', dirPath]);
         } catch (e) {
-          print('Failed to fix directory permissions for $dirPath: $e');
+          logE('Failed to fix directory permissions for $dirPath:', e);
         }
       }
     }
@@ -201,7 +202,7 @@ class FilePathUtils {
         await file.delete();
       }
     } catch (e) {
-      print('Failed to delete file $filePath: $e');
+      logE('Failed to delete file $filePath:', e);
     }
   }
   
@@ -213,7 +214,7 @@ class FilePathUtils {
         await dir.delete(recursive: true);
       }
     } catch (e) {
-      print('Failed to delete directory $dirPath: $e');
+      logE('Failed to delete directory $dirPath:', e);
     }
   }
   
@@ -235,8 +236,8 @@ class FilePathUtils {
         await fixFilePermissions(destinationPath);
       }
     } catch (e) {
-      print('Failed to copy file $sourcePath to $destinationPath: $e');
-      throw e;
+      logE('Failed to copy file $sourcePath to $destinationPath:', e);
+      rethrow;
     }
   }
   
@@ -258,7 +259,7 @@ class FilePathUtils {
         await fixFilePermissions(destinationPath);
       }
     } catch (e) {
-      print('Failed to move file $sourcePath to $destinationPath: $e');
+      logE('Failed to move file $sourcePath to $destinationPath:', e);
       // 如果重命名失败（跨磁盘），尝试复制后删除
       await copyFile(sourcePath, destinationPath);
       await safeDeleteFile(sourcePath);
@@ -276,7 +277,7 @@ class FilePathUtils {
       // 尝试用指定编码读取
       return await file.readAsString(encoding: encoding);
     } catch (e) {
-      print('Failed to read file $filePath with encoding $encoding: $e');
+      logE('Failed to read file $filePath with encoding $encoding:', e);
       
       // 尝试用utf8编码读取（针对中文文件）
       if (encoding != utf8) {
@@ -284,7 +285,7 @@ class FilePathUtils {
           final file = File(filePath);
           return await file.readAsString(encoding: utf8);
         } catch (utf8Error) {
-          print('Failed to read file $filePath with UTF-8 encoding: $utf8Error');
+          logE('Failed to read file $filePath with UTF-8 encoding:', utf8Error);
           // 最后尝试用latin1编码读取
           final file = File(filePath);
           return await file.readAsString(encoding: latin1);
@@ -308,8 +309,8 @@ class FilePathUtils {
       
       await file.writeAsString(content, encoding: encoding);
     } catch (e) {
-      print('Failed to write file $filePath: $e');
-      throw e;
+      logE('Failed to write file $filePath:', e);
+      rethrow;
     }
   }
   
@@ -323,7 +324,7 @@ class FilePathUtils {
       }
       return 0;
     } catch (e) {
-      print('Failed to get file size for $filePath: $e');
+      logE('Failed to get file size for $filePath:', e);
       return 0;
     }
   }
@@ -348,7 +349,7 @@ class FilePathUtils {
       
       return totalSize;
     } catch (e) {
-      print('Failed to get directory size for $dirPath: $e');
+      logE('Failed to get directory size for $dirPath:', e);
       return 0;
     }
   }

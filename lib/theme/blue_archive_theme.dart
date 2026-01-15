@@ -2,72 +2,93 @@ import 'package:flutter/material.dart';
 
 // 蔚蓝档案主题实现
 class BlueArchiveTheme {
-  // 主色调常量
-  static const Color primaryColor = Color(0xFF1E3A8A); // 静谧蓝
-  static const Color primaryLight = Color(0xFF60A5FA); // 浅海蓝
-  static const Color primaryDark = Color(0xFF1E40AF); // 深海蓝
-  static const Color primaryContainer = Color(0xFF3B82F6); // 晴空蓝
-  
-  // 辅助色常量
-  static const Color secondaryColor = Color(0xFFF472B6); // 樱花粉
-  static const Color secondaryLight = Color(0xFFFBCFE8); // 浅粉
-  static const Color successColor = Color(0xFF34D399); // 草绿色
-  static const Color warningColor = Color(0xFFF59E0B); // 暖橙色
-  static const Color errorColor = Color(0xFFEF4444); // 错误红
-  
-  // 中性色常量
-  static const Color backgroundColor = Color(0xFFF8FAFC); // 月光白
-  static const Color surfaceColor = Color(0xFFFFFFFF); // 纯白
-  static const Color textPrimary = Color(0xFF1F2937); // 深灰
-  static const Color textSecondary = Color(0xFF6B7280); // 星辰灰
-  static const Color textLight = Color(0xFF9CA3AF); // 浅灰
-  static const Color borderColor = Color(0xFFE5E7EB); // 边框灰
-  
-  // 圆角常量
+  // 公共常量
   static const double borderRadiusSmall = 8.0;
   static const double borderRadiusMedium = 12.0;
   static const double borderRadiusLarge = 16.0;
-  
-  // 动画时长
   static const Duration animationDuration = Duration(milliseconds: 250);
   static const Duration animationDurationSlow = Duration(milliseconds: 350);
-  
-  // 字体常量
   static const String fontFamily = 'NotoSansSC';
   
-  static ThemeData get themeData {
+  // 浅色主题常量
+  // 主色调常量
+  static const Color primaryColorLight = Color(0xFF1E3A8A); // 静谧蓝
+  static const Color primaryLightLight = Color(0xFF60A5FA); // 浅海蓝
+  static const Color primaryDarkLight = Color(0xFF1E40AF); // 深海蓝
+  static const Color primaryContainerLight = Color(0xFF3B82F6); // 晴空蓝
+  
+  // 辅助色常量
+  static const Color secondaryColorLight = Color(0xFFF472B6); // 樱花粉
+  static const Color secondaryLightLight = Color(0xFFFBCFE8); // 浅粉
+  static const Color successColorLight = Color(0xFF34D399); // 草绿色
+  static const Color warningColorLight = Color(0xFFF59E0B); // 暖橙色
+  static const Color errorColorLight = Color(0xFFEF4444); // 错误红
+  
+  // 中性色常量
+  static const Color backgroundColorLight = Color(0xFFF8FAFC); // 月光白
+  static const Color surfaceColorLight = Color(0xFFFFFFFF); // 纯白
+  static const Color textPrimaryLight = Color(0xFF1F2937); // 深灰
+  static const Color textSecondaryLight = Color(0xFF6B7280); // 星辰灰
+  static const Color textLightLight = Color(0xFF9CA3AF); // 浅灰
+  static const Color borderColorLight = Color(0xFFE5E7EB); // 边框灰
+  
+  // 深色主题常量
+  // 主色调常量
+  static const Color primaryColorDark = Color(0xFF3B82F6); // 晴空蓝
+  static const Color primaryLightDark = Color(0xFF93C5FD); // 浅海蓝
+  static const Color primaryDarkDark = Color(0xFF2563EB); // 深海蓝
+  static const Color primaryContainerDark = Color(0xFF1D4ED8); // 静谧蓝
+  
+  // 辅助色常量
+  static const Color secondaryColorDark = Color(0xFFF9A8D4); // 樱花粉
+  static const Color secondaryLightDark = Color(0xFFFBCFE8); // 浅粉
+  static const Color successColorDark = Color(0xFF86EFAC); // 草绿色
+  static const Color warningColorDark = Color(0xFFFDE047); // 暖橙色
+  static const Color errorColorDark = Color(0xFFFCA5A5); // 错误红
+  
+  // 中性色常量
+  static const Color backgroundColorDark = Color(0xFF0F172A); // 深海黑
+  static const Color surfaceColorDark = Color(0xFF1E293B); // 夜空灰
+  static const Color textPrimaryDark = Color(0xFFF1F5F9); // 月光白
+  static const Color textSecondaryDark = Color(0xFFCBD5E1); // 星辰灰
+  static const Color textLightDark = Color(0xFF94A3B8); // 浅灰
+  static const Color borderColorDark = Color(0xFF334155); // 边框灰
+  
+  // 浅色主题
+  static ThemeData get lightTheme {
     return ThemeData(
       // 主色调配置
       primarySwatch: Colors.blue,
-      primaryColor: primaryColor,
-      primaryColorLight: primaryLight,
-      primaryColorDark: primaryDark,
+      primaryColor: primaryColorLight,
+      primaryColorLight: primaryLightLight,
+      primaryColorDark: primaryDarkLight,
+      brightness: Brightness.light,
       
       // 色彩方案
       colorScheme: ColorScheme.fromSwatch(
         primarySwatch: Colors.blue,
-        cardColor: surfaceColor,
+        cardColor: surfaceColorLight,
         brightness: Brightness.light,
       ).copyWith(
-        primary: primaryColor,
-        primaryContainer: primaryContainer,
-        secondary: secondaryColor,
-        secondaryContainer: secondaryLight,
-        surface: surfaceColor,
-        error: errorColor,
+        primary: primaryColorLight,
+        primaryContainer: primaryContainerLight,
+        secondary: secondaryColorLight,
+        secondaryContainer: secondaryLightLight,
+        surface: surfaceColorLight,
+        error: errorColorLight,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onSurface: textPrimary,
+        onSurface: textPrimaryLight,
         onError: Colors.white,
       ),
       
       // 文本主题
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         // 主标题
         headlineLarge: TextStyle(
           fontSize: 24.0,
           fontWeight: FontWeight.bold,
-          color: primaryColor,
+          color: primaryColorLight,
           fontFamily: fontFamily,
           letterSpacing: -0.5,
         ),
@@ -75,7 +96,7 @@ class BlueArchiveTheme {
         headlineMedium: TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
-          color: primaryColor,
+          color: primaryColorLight,
           fontFamily: fontFamily,
           letterSpacing: -0.25,
         ),
@@ -83,14 +104,14 @@ class BlueArchiveTheme {
         titleLarge: TextStyle(
           fontSize: 18.0,
           fontWeight: FontWeight.w600,
-          color: primaryContainer,
+          color: primaryContainerLight,
           fontFamily: fontFamily,
         ),
         // 正文大
         bodyLarge: TextStyle(
           fontSize: 16.0,
           fontWeight: FontWeight.normal,
-          color: textSecondary,
+          color: textSecondaryLight,
           fontFamily: fontFamily,
           height: 1.5,
         ),
@@ -98,7 +119,7 @@ class BlueArchiveTheme {
         bodyMedium: TextStyle(
           fontSize: 14.0,
           fontWeight: FontWeight.normal,
-          color: textSecondary,
+          color: textSecondaryLight,
           fontFamily: fontFamily,
           height: 1.5,
         ),
@@ -106,7 +127,7 @@ class BlueArchiveTheme {
         bodySmall: TextStyle(
           fontSize: 12.0,
           fontWeight: FontWeight.normal,
-          color: textLight,
+          color: textLightLight,
           fontFamily: fontFamily,
         ),
         // 按钮文字
@@ -121,15 +142,15 @@ class BlueArchiveTheme {
         labelMedium: TextStyle(
           fontSize: 13.0,
           fontWeight: FontWeight.w500,
-          color: primaryColor,
+          color: primaryColorLight,
           fontFamily: fontFamily,
           letterSpacing: 0.1,
         ),
       ),
       
       // 应用栏主题
-      appBarTheme: AppBarTheme(
-        backgroundColor: primaryColor,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: primaryColorLight,
         elevation: 0.0,
         shadowColor: Colors.transparent,
         titleTextStyle: TextStyle(
@@ -138,16 +159,16 @@ class BlueArchiveTheme {
           fontWeight: FontWeight.bold,
           fontFamily: fontFamily,
         ),
-        iconTheme: const IconThemeData(
+        iconTheme: IconThemeData(
           color: Colors.white,
           size: 24.0,
         ),
-        actionsIconTheme: const IconThemeData(
+        actionsIconTheme: IconThemeData(
           color: Colors.white,
           size: 24.0,
         ),
         centerTitle: true,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(borderRadiusMedium),
           ),
@@ -157,7 +178,7 @@ class BlueArchiveTheme {
       // 按钮主题
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryColor,
+          backgroundColor: primaryColorLight,
           foregroundColor: Colors.white,
           elevation: 0.0,
           shadowColor: Colors.transparent,
@@ -165,7 +186,7 @@ class BlueArchiveTheme {
             borderRadius: BorderRadius.circular(borderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
             fontFamily: fontFamily,
@@ -177,8 +198,8 @@ class BlueArchiveTheme {
       // 文本按钮主题
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: primaryColor,
-          textStyle: TextStyle(
+          foregroundColor: primaryColorLight,
+          textStyle: const TextStyle(
             fontSize: 14.0,
             fontWeight: FontWeight.w500,
             fontFamily: fontFamily,
@@ -190,13 +211,13 @@ class BlueArchiveTheme {
       // 填充按钮主题
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: primaryColor,
+          backgroundColor: primaryColorLight,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadiusMedium),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
             fontFamily: fontFamily,
@@ -211,73 +232,73 @@ class BlueArchiveTheme {
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          side: const BorderSide(color: borderColor, width: 1.0),
+          side: const BorderSide(color: borderColorLight, width: 1.0),
         ),
         margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        color: surfaceColor,
+        color: surfaceColorLight,
       ),
       
       // 输入框主题
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: borderColor),
+          borderSide: const BorderSide(color: borderColorLight),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: primaryContainer, width: 2.0),
+          borderSide: const BorderSide(color: primaryContainerLight, width: 2.0),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: borderColor),
+          borderSide: const BorderSide(color: borderColorLight),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: borderColor),
+          borderSide: const BorderSide(color: borderColorLight),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: errorColor),
+          borderSide: const BorderSide(color: errorColorLight),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
-          borderSide: const BorderSide(color: errorColor, width: 2.0),
+          borderSide: const BorderSide(color: errorColorLight, width: 2.0),
         ),
-        hintStyle: TextStyle(
-          color: textLight,
+        hintStyle: const TextStyle(
+          color: textLightLight,
           fontSize: 14.0,
           fontFamily: fontFamily,
         ),
-        labelStyle: TextStyle(
-          color: textSecondary,
+        labelStyle: const TextStyle(
+          color: textSecondaryLight,
           fontSize: 14.0,
           fontFamily: fontFamily,
         ),
-        helperStyle: TextStyle(
-          color: textLight,
+        helperStyle: const TextStyle(
+          color: textLightLight,
           fontSize: 12.0,
           fontFamily: fontFamily,
         ),
-        errorStyle: TextStyle(
-          color: errorColor,
+        errorStyle: const TextStyle(
+          color: errorColorLight,
           fontSize: 12.0,
           fontFamily: fontFamily,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         isDense: true,
         filled: true,
-        fillColor: surfaceColor,
+        fillColor: surfaceColorLight,
       ),
       
       // 图标主题
-      iconTheme: IconThemeData(
-        color: textSecondary,
+      iconTheme: const IconThemeData(
+        color: textSecondaryLight,
         size: 24.0,
       ),
       
       // 分割线主题
-      dividerTheme: DividerThemeData(
-        color: borderColor,
+      dividerTheme: const DividerThemeData(
+        color: borderColorLight,
         thickness: 1.0,
         space: 16.0,
       ),
@@ -288,33 +309,33 @@ class BlueArchiveTheme {
           borderRadius: BorderRadius.circular(borderRadiusMedium),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        iconColor: textSecondary,
+        iconColor: textSecondaryLight,
       ),
       
       // 开关主题
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primaryColor;
+            return primaryColorLight;
           }
-          return borderColor;
+          return borderColorLight;
         }),
         trackColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primaryLight;
+            return primaryLightLight;
           }
-          return borderColor;
+          return borderColorLight;
         }),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       
       // 滑块主题
       sliderTheme: SliderThemeData(
-        activeTrackColor: primaryColor,
-        inactiveTrackColor: borderColor,
-        thumbColor: primaryColor,
-        overlayColor: primaryLight.withValues(alpha: 0.3 * 255),
-        activeTickMarkColor: primaryColor,
+        activeTrackColor: primaryColorLight,
+        inactiveTrackColor: borderColorLight,
+        thumbColor: primaryColorLight,
+        overlayColor: primaryLightLight.withValues(alpha: 0.3),
+        activeTickMarkColor: primaryColorLight,
         inactiveTickMarkColor: Colors.transparent,
         trackHeight: 4.0,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
@@ -322,40 +343,40 @@ class BlueArchiveTheme {
       ),
       
       // 进度指示器主题
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: primaryColor,
-        linearTrackColor: borderColor,
-        circularTrackColor: borderColor,
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primaryColorLight,
+        linearTrackColor: borderColorLight,
+        circularTrackColor: borderColorLight,
       ),
       
       // 对话框主题
       dialogTheme: DialogThemeData(
-        surfaceTintColor: surfaceColor,
+        surfaceTintColor: surfaceColorLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadiusLarge),
         ),
         elevation: 0.0,
         shadowColor: Colors.transparent,
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           fontSize: 20.0,
           fontWeight: FontWeight.bold,
-          color: textPrimary,
+          color: textPrimaryLight,
           fontFamily: fontFamily,
         ),
-        contentTextStyle: TextStyle(
+        contentTextStyle: const TextStyle(
           fontSize: 14.0,
-          color: textSecondary,
+          color: textSecondaryLight,
           fontFamily: fontFamily,
           height: 1.5,
         ),
       ),
       
       // 底部导航栏主题
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: surfaceColor,
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: surfaceColorLight,
         elevation: 0.0,
-        selectedItemColor: primaryColor,
-        unselectedItemColor: textSecondary,
+        selectedItemColor: primaryColorLight,
+        unselectedItemColor: textSecondaryLight,
         selectedLabelStyle: TextStyle(
           fontSize: 12.0,
           fontWeight: FontWeight.w500,
@@ -363,22 +384,22 @@ class BlueArchiveTheme {
         ),
         unselectedLabelStyle: TextStyle(
           fontSize: 12.0,
-          color: textSecondary,
+          color: textSecondaryLight,
           fontFamily: fontFamily,
         ),
         type: BottomNavigationBarType.fixed,
       ),
       
       // 底部应用栏主题
-      bottomAppBarTheme: BottomAppBarThemeData(
-        color: surfaceColor,
+      bottomAppBarTheme: const BottomAppBarThemeData(
+        color: surfaceColorLight,
         elevation: 0.0,
-        shape: const CircularNotchedRectangle(),
+        shape: CircularNotchedRectangle(),
       ),
       
       // 浮动操作按钮主题
       floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: primaryColor,
+        backgroundColor: primaryColorLight,
         foregroundColor: Colors.white,
         elevation: 0.0,
         shape: RoundedRectangleBorder(
@@ -403,12 +424,12 @@ class BlueArchiveTheme {
       
       // 扩展面板主题
       expansionTileTheme: ExpansionTileThemeData(
-        backgroundColor: surfaceColor,
-        collapsedBackgroundColor: surfaceColor,
-        textColor: textPrimary,
-        collapsedTextColor: textSecondary,
-        iconColor: textSecondary,
-        collapsedIconColor: textLight,
+        backgroundColor: surfaceColorLight,
+        collapsedBackgroundColor: surfaceColorLight,
+        textColor: textPrimaryLight,
+        collapsedTextColor: textSecondaryLight,
+        iconColor: textSecondaryLight,
+        collapsedIconColor: textLightLight,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadiusMedium),
         ),
@@ -419,15 +440,408 @@ class BlueArchiveTheme {
       ),
       
       // 主题扩展
-      extensions: <ThemeExtension>[_BlueArchiveThemeExtension()],
+      extensions: const <ThemeExtension>[_BlueArchiveThemeExtension()],
       
       // 视觉密度
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      
-      // 禁用动画（用于测试或性能优化）
-      // disableAnimations: true,
     );
   }
+  
+  // 深色主题
+  static ThemeData get darkTheme {
+    return ThemeData(
+      // 主色调配置
+      primarySwatch: Colors.blue,
+      primaryColor: primaryColorDark,
+      primaryColorLight: primaryLightDark,
+      primaryColorDark: primaryDarkDark,
+      brightness: Brightness.dark,
+      
+      // 色彩方案
+      colorScheme: ColorScheme.fromSwatch(
+        primarySwatch: Colors.blue,
+        cardColor: surfaceColorDark,
+        brightness: Brightness.dark,
+      ).copyWith(
+        primary: primaryColorDark,
+        primaryContainer: primaryContainerDark,
+        secondary: secondaryColorDark,
+        secondaryContainer: secondaryLightDark,
+        surface: surfaceColorDark,
+        error: errorColorDark,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
+        onSurface: textPrimaryDark,
+        onError: Colors.white,
+      ),
+      
+      // 文本主题
+      textTheme: const TextTheme(
+        // 主标题
+        headlineLarge: TextStyle(
+          fontSize: 24.0,
+          fontWeight: FontWeight.bold,
+          color: primaryColorDark,
+          fontFamily: fontFamily,
+          letterSpacing: -0.5,
+        ),
+        // 副标题
+        headlineMedium: TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          color: primaryColorDark,
+          fontFamily: fontFamily,
+          letterSpacing: -0.25,
+        ),
+        // 卡片标题
+        titleLarge: TextStyle(
+          fontSize: 18.0,
+          fontWeight: FontWeight.w600,
+          color: primaryContainerDark,
+          fontFamily: fontFamily,
+        ),
+        // 正文大
+        bodyLarge: TextStyle(
+          fontSize: 16.0,
+          fontWeight: FontWeight.normal,
+          color: textSecondaryDark,
+          fontFamily: fontFamily,
+          height: 1.5,
+        ),
+        // 正文
+        bodyMedium: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.normal,
+          color: textSecondaryDark,
+          fontFamily: fontFamily,
+          height: 1.5,
+        ),
+        // 辅助文字
+        bodySmall: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.normal,
+          color: textLightDark,
+          fontFamily: fontFamily,
+        ),
+        // 按钮文字
+        labelLarge: TextStyle(
+          fontSize: 14.0,
+          fontWeight: FontWeight.w500,
+          color: Colors.white,
+          fontFamily: fontFamily,
+          letterSpacing: 0.1,
+        ),
+        // 按钮文字（次要）
+        labelMedium: TextStyle(
+          fontSize: 13.0,
+          fontWeight: FontWeight.w500,
+          color: primaryColorDark,
+          fontFamily: fontFamily,
+          letterSpacing: 0.1,
+        ),
+      ),
+      
+      // 应用栏主题
+      appBarTheme: const AppBarTheme(
+        backgroundColor: primaryColorDark,
+        elevation: 0.0,
+        shadowColor: Colors.transparent,
+        titleTextStyle: TextStyle(
+          color: Colors.white,
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          fontFamily: fontFamily,
+        ),
+        iconTheme: IconThemeData(
+          color: Colors.white,
+          size: 24.0,
+        ),
+        actionsIconTheme: IconThemeData(
+          color: Colors.white,
+          size: 24.0,
+        ),
+        centerTitle: true,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(borderRadiusMedium),
+          ),
+        ),
+      ),
+      
+      // 按钮主题
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColorDark,
+          foregroundColor: Colors.white,
+          elevation: 0.0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusMedium),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          textStyle: const TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w600,
+            fontFamily: fontFamily,
+          ),
+          animationDuration: animationDuration,
+        ),
+      ),
+      
+      // 文本按钮主题
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: primaryColorDark,
+          textStyle: const TextStyle(
+            fontSize: 14.0,
+            fontWeight: FontWeight.w500,
+            fontFamily: fontFamily,
+          ),
+          animationDuration: animationDuration,
+        ),
+      ),
+      
+      // 填充按钮主题
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: primaryColorDark,
+          foregroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusMedium),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          textStyle: const TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w600,
+            fontFamily: fontFamily,
+          ),
+          animationDuration: animationDuration,
+        ),
+      ),
+      
+      // 卡片主题
+      cardTheme: CardThemeData(
+        elevation: 0.0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          side: const BorderSide(color: borderColorDark, width: 1.0),
+        ),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        color: surfaceColorDark,
+      ),
+      
+      // 输入框主题
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: borderColorDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: primaryContainerDark, width: 2.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: borderColorDark),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: borderColorDark),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: errorColorDark),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderSide: const BorderSide(color: errorColorDark, width: 2.0),
+        ),
+        hintStyle: const TextStyle(
+          color: textLightDark,
+          fontSize: 14.0,
+          fontFamily: fontFamily,
+        ),
+        labelStyle: const TextStyle(
+          color: textSecondaryDark,
+          fontSize: 14.0,
+          fontFamily: fontFamily,
+        ),
+        helperStyle: const TextStyle(
+          color: textLightDark,
+          fontSize: 12.0,
+          fontFamily: fontFamily,
+        ),
+        errorStyle: const TextStyle(
+          color: errorColorDark,
+          fontSize: 12.0,
+          fontFamily: fontFamily,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        isDense: true,
+        filled: true,
+        fillColor: surfaceColorDark,
+      ),
+      
+      // 图标主题
+      iconTheme: const IconThemeData(
+        color: textSecondaryDark,
+        size: 24.0,
+      ),
+      
+      // 分割线主题
+      dividerTheme: const DividerThemeData(
+        color: borderColorDark,
+        thickness: 1.0,
+        space: 16.0,
+      ),
+      
+      // 列表主题
+      listTileTheme: ListTileThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        iconColor: textSecondaryDark,
+      ),
+      
+      // 开关主题
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return primaryColorDark;
+          }
+          return borderColorDark;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return primaryLightDark;
+          }
+          return borderColorDark;
+        }),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      
+      // 滑块主题
+      sliderTheme: SliderThemeData(
+        activeTrackColor: primaryColorDark,
+        inactiveTrackColor: borderColorDark,
+        thumbColor: primaryColorDark,
+        overlayColor: primaryLightDark.withValues(alpha: 0.3),
+        activeTickMarkColor: primaryColorDark,
+        inactiveTickMarkColor: Colors.transparent,
+        trackHeight: 4.0,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12.0),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 24.0),
+      ),
+      
+      // 进度指示器主题
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primaryColorDark,
+        linearTrackColor: borderColorDark,
+        circularTrackColor: borderColorDark,
+      ),
+      
+      // 对话框主题
+      dialogTheme: DialogThemeData(
+        surfaceTintColor: surfaceColorDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusLarge),
+        ),
+        elevation: 0.0,
+        shadowColor: Colors.transparent,
+        titleTextStyle: const TextStyle(
+          fontSize: 20.0,
+          fontWeight: FontWeight.bold,
+          color: textPrimaryDark,
+          fontFamily: fontFamily,
+        ),
+        contentTextStyle: const TextStyle(
+          fontSize: 14.0,
+          color: textSecondaryDark,
+          fontFamily: fontFamily,
+          height: 1.5,
+        ),
+      ),
+      
+      // 底部导航栏主题
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: surfaceColorDark,
+        elevation: 0.0,
+        selectedItemColor: primaryColorDark,
+        unselectedItemColor: textSecondaryDark,
+        selectedLabelStyle: TextStyle(
+          fontSize: 12.0,
+          fontWeight: FontWeight.w500,
+          fontFamily: fontFamily,
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontSize: 12.0,
+          color: textSecondaryDark,
+          fontFamily: fontFamily,
+        ),
+        type: BottomNavigationBarType.fixed,
+      ),
+      
+      // 底部应用栏主题
+      bottomAppBarTheme: const BottomAppBarThemeData(
+        color: surfaceColorDark,
+        elevation: 0.0,
+        shape: CircularNotchedRectangle(),
+      ),
+      
+      // 浮动操作按钮主题
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primaryColorDark,
+        foregroundColor: Colors.white,
+        elevation: 0.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusLarge),
+        ),
+        sizeConstraints: const BoxConstraints(
+          minWidth: 56.0,
+          minHeight: 56.0,
+        ),
+      ),
+      
+      // 页面过渡主题
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
+      
+      // 扩展面板主题
+      expansionTileTheme: ExpansionTileThemeData(
+        backgroundColor: surfaceColorDark,
+        collapsedBackgroundColor: surfaceColorDark,
+        textColor: textPrimaryDark,
+        collapsedTextColor: textSecondaryDark,
+        iconColor: textSecondaryDark,
+        collapsedIconColor: textLightDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+        ),
+        collapsedShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadiusMedium),
+        ),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      ),
+      
+      // 主题扩展
+      extensions: const <ThemeExtension>[_BlueArchiveThemeExtension()],
+      
+      // 视觉密度
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+    );
+  }
+  
+  // 主题数据（兼容现有代码，默认浅色主题）
+  static ThemeData get themeData => lightTheme;
 }
 
 // 自定义主题扩展

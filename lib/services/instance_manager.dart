@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bamclauncher/models/instance_model.dart';
 import 'package:bamclauncher/utils/file_path_utils.dart';
+import 'package:bamclauncher/utils/logger.dart';
 
 // 实例管理服务
 class InstanceManager {
@@ -28,7 +29,7 @@ class InstanceManager {
             final instance = InstanceModel.fromJson(json);
             instances.add(instance);
           } catch (e) {
-            print('Failed to load instance: ${entity.path}, error: $e');
+            logE('Failed to load instance: ${entity.path}, error:', e);
           }
         }
       }
@@ -56,7 +57,7 @@ class InstanceManager {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
       return InstanceModel.fromJson(json);
     } catch (e) {
-      print('Failed to load instance: $id, error: $e');
+      logE('Failed to load instance: $id, error:', e);
       return null;
     }
   }
@@ -120,15 +121,15 @@ class InstanceManager {
     try {
       // 1. 验证Java环境
       final javaPath = await _verifyJavaEnvironment(instance.javaPath);
-      print('Using Java: $javaPath');
+      logI('Using Java: $javaPath');
       
       // 2. 构建启动参数
       final launchArgs = await _buildLaunchArguments(instance, javaPath);
-      print('Launch arguments: $launchArgs');
+      logD('Launch arguments: $launchArgs');
       
       // 3. 启动Minecraft进程
       final process = await _startMinecraftProcess(launchArgs, instance.instanceDir);
-      print('Minecraft process started with PID: ${process.pid}');
+      logI('Minecraft process started with PID: ${process.pid}');
       
       // 4. 监控进程状态
       _monitorProcess(process, instance);
@@ -136,10 +137,10 @@ class InstanceManager {
       // 5. 更新实例状态
       await updateInstance(instance.copyWith(isActive: true));
       
-      print('Successfully launched instance: ${instance.name}');
+      logI('Successfully launched instance: ${instance.name}');
     } catch (e) {
-      print('Failed to launch instance ${instance.name}: $e');
-      throw e;
+      logE('Failed to launch instance ${instance.name}:', e);
+      rethrow;
     }
   }
   
@@ -169,7 +170,7 @@ class InstanceManager {
       );
       
       final output = result.stderr.toString().toLowerCase();
-      print('Java version output: $output');
+      logD('Java version output: $output');
       
       // 检查Java版本是否符合要求（至少Java 8）
       if (!output.contains('version "1.8') && 
@@ -201,7 +202,7 @@ class InstanceManager {
         return javaPath;
       }
     } catch (e) {
-      print('Failed to find Java in PATH: $e');
+      logE('Failed to find Java in PATH:', e);
     }
     
     // 检查常见Java安装路径
@@ -226,7 +227,7 @@ class InstanceManager {
           await _verifyJavaVersion(path);
           return path;
         } catch (e) {
-          print('Java at $path is invalid: $e');
+          logE('Java at $path is invalid:', e);
         }
       }
     }
@@ -569,7 +570,7 @@ class InstanceManager {
   void _monitorProcess(Process process, InstanceModel instance) {
     // 监听进程退出
     process.exitCode.then((exitCode) async {
-      print('Minecraft process exited with code: $exitCode');
+      logI('Minecraft process exited with code: $exitCode');
       
       // 更新实例状态
       await updateInstance(instance.copyWith(isActive: false));
@@ -583,7 +584,7 @@ class InstanceManager {
     // 监听标准输出
     process.stdout.listen((List<int> data) {
       final output = String.fromCharCodes(data);
-      print('[Minecraft] $output');
+      logD('[Minecraft] $output');
       
       // 解析游戏日志，提取有用信息
       _parseGameLog(output, instance);
@@ -592,7 +593,7 @@ class InstanceManager {
     // 监听标准错误
     process.stderr.listen((List<int> data) {
       final error = String.fromCharCodes(data);
-      print('[Minecraft Error] $error');
+      logE('[Minecraft Error] $error');
       
       // 解析错误日志，检测崩溃原因
       _parseErrorLog(error, instance);
@@ -656,7 +657,7 @@ class InstanceManager {
           'solution': errorType['solution'],
         };
         
-        print('Detected error: ${errorType['type']} - ${errorType['solution']}');
+        logE('Detected error: ${errorType['type']} - ${errorType['solution']}');
         
         // 更新实例的错误信息
         _updateInstanceError(instance, errorInfo);
@@ -668,12 +669,12 @@ class InstanceManager {
   // 更新实例错误信息
   void _updateInstanceError(InstanceModel instance, Map<String, dynamic> errorInfo) {
     // 这里可以添加更新实例错误信息的逻辑
-    print('Updating instance error info: $errorInfo');
+    logD('Updating instance error info: $errorInfo');
   }
   
   // 处理进程崩溃
   Future<void> _handleProcessCrash(InstanceModel instance, int exitCode) async {
-    print('Instance ${instance.name} crashed with exit code: $exitCode');
+    logE('Instance ${instance.name} crashed with exit code: $exitCode');
     
     // 1. 收集崩溃日志
     // 2. 分析崩溃原因
@@ -734,7 +735,7 @@ class InstanceManager {
   void _handlePlayerJoin(String logLine, InstanceModel instance) {
     // 提取玩家名称
     final playerName = logLine.split('joined the game')[0].trim();
-    print('Player $playerName joined the game in instance ${instance.name}');
+    logI('Player $playerName joined the game in instance ${instance.name}');
     
     // 更新实例的在线玩家列表
     final updatedPlayers = List<String>.from(instance.onlinePlayers);
@@ -751,7 +752,7 @@ class InstanceManager {
   void _handlePlayerLeave(String logLine, InstanceModel instance) {
     // 提取玩家名称
     final playerName = logLine.split('left the game')[0].trim();
-    print('Player $playerName left the game in instance ${instance.name}');
+    logI('Player $playerName left the game in instance ${instance.name}');
     
     // 更新实例的在线玩家列表
     final updatedPlayers = List<String>.from(instance.onlinePlayers);
@@ -764,7 +765,7 @@ class InstanceManager {
   
   // 处理服务器连接事件
   void _handleServerConnection(String logLine, InstanceModel instance) {
-    print('Server connection: $logLine in instance ${instance.name}');
+    logD('Server connection: $logLine in instance ${instance.name}');
     
     // 更新实例连接状态
     String serverAddress = instance.serverAddress;
@@ -787,7 +788,7 @@ class InstanceManager {
   
   // 处理游戏准备就绪事件
   void _handleGameReady(String logLine, InstanceModel instance) {
-    print('Game ready: $logLine in instance ${instance.name}');
+    logI('Game ready: $logLine in instance ${instance.name}');
     
     // 更新实例状态为就绪
     updateInstance(
@@ -800,7 +801,7 @@ class InstanceManager {
   
   // 处理游戏错误事件
   void _handleGameError(String logLine, InstanceModel instance) {
-    print('Game error: $logLine in instance ${instance.name}');
+    logE('Game error: $logLine in instance ${instance.name}');
     
     // 更新实例的错误信息
     final updatedErrors = List<Map<String, dynamic>>.from(instance.gameErrors);
@@ -816,7 +817,7 @@ class InstanceManager {
   
   // 处理资源加载事件
   void _handleResourceLoading(String logLine, InstanceModel instance) {
-    print('Resource loading: $logLine in instance ${instance.name}');
+    logD('Resource loading: $logLine in instance ${instance.name}');
     
     // 更新资源加载进度
     // 简单实现：根据日志行数增加进度

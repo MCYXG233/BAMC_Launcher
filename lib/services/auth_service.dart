@@ -1,5 +1,5 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
+import '../utils/logger.dart';
 
 class AuthService {
   // Microsoft OAuth 配置
@@ -45,9 +45,9 @@ class AuthService {
         '&response_mode=query'
       );
       
-      print('请在浏览器中打开以下URL进行登录:');
-      print(loginUrl.toString());
-      print('\n登录成功后，将浏览器地址栏中的完整URL复制到下方:');
+      logI('请在浏览器中打开以下URL进行登录:');
+      logI(loginUrl.toString());
+      logI('\n登录成功后，将浏览器地址栏中的完整URL复制到下方:');
       
       // 这里需要实现一个本地HTTP服务器来监听回调
       // 或者让用户手动复制回调URL
@@ -63,7 +63,7 @@ class AuthService {
         'userType': 'microsoft',
       };
     } catch (e) {
-      print('Microsoft登录失败: $e');
+      logE('Microsoft登录失败:', e);
       rethrow;
     }
   }
@@ -71,21 +71,21 @@ class AuthService {
   // Mojang 登录 (已废弃，仅支持旧版账户)
   Future<Map<String, dynamic>> loginWithMojang(String username, String password) async {
     try {
-      final response = await http.post(
-        Uri.parse(_mojangAuthEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final dio = Dio();
+      final response = await dio.post(
+        _mojangAuthEndpoint,
+        data: {
           'agent': {
             'name': 'Minecraft',
             'version': 1,
           },
           'username': username,
           'password': password,
-        }),
+        },
       );
       
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = response.data;
         
         _accessToken = data['accessToken'];
         _refreshToken = data['clientToken'];
@@ -102,10 +102,10 @@ class AuthService {
           'userType': _userType,
         };
       } else {
-        throw Exception('登录失败：${jsonDecode(response.body)['errorMessage']}');
+        throw Exception('登录失败：${response.data['errorMessage']}');
       }
     } catch (e) {
-      print('Mojang 登录失败: $e');
+      logE('Mojang 登录失败:', e);
       rethrow;
     }
   }
@@ -117,17 +117,17 @@ class AuthService {
         throw Exception('没有可用的刷新令牌');
       }
       
-      final response = await http.post(
-        Uri.parse(_mojangRefreshEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
+      final dio = Dio();
+      final response = await dio.post(
+        _mojangRefreshEndpoint,
+        data: {
           'accessToken': _accessToken,
           'clientToken': _refreshToken,
-        }),
+        },
       );
       
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = response.data;
         
         _accessToken = data['accessToken'];
         _refreshToken = data['clientToken'];
@@ -138,10 +138,10 @@ class AuthService {
           'refreshToken': _refreshToken,
         };
       } else {
-        throw Exception('刷新令牌失败：${jsonDecode(response.body)['errorMessage']}');
+        throw Exception('刷新令牌失败：${response.data['errorMessage']}');
       }
     } catch (e) {
-      print('刷新令牌失败: $e');
+      logE('刷新令牌失败:', e);
       rethrow;
     }
   }
@@ -153,17 +153,20 @@ class AuthService {
         return false;
       }
       
-      final response = await http.post(
-        Uri.parse(_mojangValidateEndpoint),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'accessToken': _accessToken,
-        }),
-      );
-      
-      return response.statusCode == 204;
+      final dio = Dio();
+      try {
+        final response = await dio.post(
+          _mojangValidateEndpoint,
+          data: {
+            'accessToken': _accessToken,
+          },
+        );
+        return response.statusCode == 204;
+      } on DioException catch (e) {
+        return e.response?.statusCode == 204;
+      }
     } catch (e) {
-      print('验证令牌失败: $e');
+      logE('验证令牌失败:', e);
       return false;
     }
   }
@@ -172,13 +175,13 @@ class AuthService {
   Future<void> logout() async {
     try {
       if (_accessToken != null && _refreshToken != null) {
-        await http.post(
-          Uri.parse(_mojangInvalidateEndpoint),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
+        final dio = Dio();
+        await dio.post(
+          _mojangInvalidateEndpoint,
+          data: {
             'accessToken': _accessToken,
             'clientToken': _refreshToken,
-          }),
+          },
         );
       }
       
@@ -189,7 +192,7 @@ class AuthService {
       _username = null;
       _userType = null;
     } catch (e) {
-      print('登出失败: $e');
+      logE('登出失败:', e);
       // 即使API调用失败，也清除本地信息
       _accessToken = null;
       _refreshToken = null;

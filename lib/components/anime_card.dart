@@ -12,7 +12,7 @@ class AnimeCard extends StatefulWidget {
   final Color? borderColor;
   
   const AnimeCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     this.icon,
@@ -21,13 +21,13 @@ class AnimeCard extends StatefulWidget {
     this.padding = const EdgeInsets.all(16),
     this.backgroundColor,
     this.borderColor,
-  }) : super(key: key);
+  });
   
   @override
-  _AnimeCardState createState() => _AnimeCardState();
+  AnimeCardState createState() => AnimeCardState();
 }
 
-class _AnimeCardState extends State<AnimeCard> with SingleTickerProviderStateMixin {
+class AnimeCardState extends State<AnimeCard> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;

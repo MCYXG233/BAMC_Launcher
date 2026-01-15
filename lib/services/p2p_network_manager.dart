@@ -1057,7 +1057,7 @@ class P2PNetworkManager {
       await Future.delayed(const Duration(milliseconds: 100));
     } catch (e) {
       print('Failed to send disconnect notification to $peerAddress: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -1155,7 +1155,7 @@ class P2PNetworkManager {
       print('Message sent via TCP to $peerAddress: $messageJson');
     } catch (e) {
       print('Failed to send message via TCP to $peerAddress: $e');
-      throw e;
+      rethrow;
     }
   }
   
@@ -1182,7 +1182,7 @@ class P2PNetworkManager {
       }
     } catch (e) {
       print('Failed to send message via HTTP to $peerAddress: $e');
-      throw e;
+      rethrow;
     }
   }
   

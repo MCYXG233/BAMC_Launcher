@@ -12,7 +12,7 @@ class AnimeButton extends StatefulWidget {
   final Widget? trailingIcon;
   
   const AnimeButton({
-    Key? key,
+    super.key,
     required this.text,
     this.onPressed,
     this.isPrimary = true,
@@ -21,13 +21,13 @@ class AnimeButton extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
     this.leadingIcon,
     this.trailingIcon,
-  }) : super(key: key);
+  });
   
   @override
-  _AnimeButtonState createState() => _AnimeButtonState();
+  AnimeButtonState createState() => AnimeButtonState();
 }
 
-class _AnimeButtonState extends State<AnimeButton> with SingleTickerProviderStateMixin {
+class AnimeButtonState extends State<AnimeButton> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
@@ -62,7 +62,7 @@ class _AnimeButtonState extends State<AnimeButton> with SingleTickerProviderStat
             ? theme.primaryColor
             : theme.colorScheme.secondary;
     
-    final foregroundColor = Colors.white;
+    const foregroundColor = Colors.white;
     
     final borderColor = widget.isDisabled
         ? theme.disabledColor
