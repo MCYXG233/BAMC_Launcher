@@ -74,10 +74,12 @@ class AnimeButtonState extends State<AnimeButton> with SingleTickerProviderState
       onEnter: (_) {
         if (!widget.isDisabled) {
           setState(() => _isHovered = true);
+          _controller.forward();
         }
       },
       onExit: (_) {
         setState(() => _isHovered = false);
+        _controller.reverse();
       },
       child: ScaleTransition(
         scale: _scaleAnimation,
@@ -100,7 +102,7 @@ class AnimeButtonState extends State<AnimeButton> with SingleTickerProviderState
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(widget.borderRadius),
                 side: BorderSide(
-                  color: _isHovered && !widget.isDisabled ? borderColor.withValues(alpha: 0.8 * 255) : Colors.transparent,
+                  color: _isHovered && !widget.isDisabled ? borderColor.withOpacity(0.8) : Colors.transparent,
                   width: 2,
                 ),
               ),
@@ -117,19 +119,19 @@ class AnimeButtonState extends State<AnimeButton> with SingleTickerProviderState
                   return theme.disabledColor;
                 }
                 if (states.contains(WidgetState.pressed)) {
-                  return backgroundColor.withValues(alpha: 0.9 * 255);
+                  return backgroundColor.withOpacity(0.9);
                 }
                 return backgroundColor;
               }),
               overlayColor: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.pressed)) {
-                  return foregroundColor.withValues(alpha: 0.2 * 255);
+                  return foregroundColor.withOpacity(0.2);
                 }
                 return Colors.transparent;
               }),
               side: WidgetStateProperty.resolveWith((states) {
                 if (states.contains(WidgetState.hovered) && !widget.isDisabled) {
-                  return BorderSide(color: borderColor.withValues(alpha: 0.8 * 255), width: 2);
+                  return BorderSide(color: borderColor.withOpacity(0.8), width: 2);
                 }
                 return const BorderSide(color: Colors.transparent, width: 2);
               }),

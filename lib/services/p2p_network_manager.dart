@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' show utf8, base64, jsonEncode, jsonDecode;
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import '../utils/logger.dart';
 
 // 网络状态枚举
 enum NetworkStatus {
@@ -97,7 +98,7 @@ class P2PNetworkManager {
       // 更新网络状态
       _p2pController.add(NetworkStatus.connected);
     } catch (e) {
-      print('Failed to discover peers: $e');
+      logE('Failed to discover peers:', e);
       _p2pController.add(NetworkStatus.discoveryFailed);
     }
   }
@@ -121,7 +122,7 @@ class P2PNetworkManager {
         address,
         _broadcastPort,
       );
-      print('Sent broadcast to $address:$_broadcastPort');
+      logI('Sent broadcast to $address:$_broadcastPort');
     }
   }
   
@@ -164,7 +165,7 @@ class P2PNetworkManager {
         return InternetAddress(broadcast);
       }
     } catch (e) {
-      print('Failed to calculate broadcast address: $e');
+      logE('Failed to calculate broadcast address:', e);
     }
     return null;
   }
@@ -218,11 +219,11 @@ class P2PNetworkManager {
         // 添加到节点列表（去重）
         if (!_nodes.any((n) => n.address == node.address && n.port == node.port)) {
           _nodes.add(node);
-          print('Discovered node: ${node.name} at ${node.address}:${node.port} (ping: ${node.ping}ms)');
+          logI('Discovered node: ${node.name} at ${node.address}:${node.port} (ping: ${node.ping}ms)');
         }
       }
     } catch (e) {
-      print('Failed to handle datagram: $e');
+      logE('Failed to handle datagram:', e);
     }
   }
   
@@ -238,11 +239,11 @@ class P2PNetworkManager {
       
       // 2. 建立TCP连接
       final socket = await Socket.connect(address, port, timeout: const Duration(seconds: 5));
-      print('TCP connection established with $peerAddress');
+      logI('TCP connection established with $peerAddress');
       
       // 3. 交换节点信息
       final nodeInfo = await _exchangeNodeInfo(socket);
-      print('Node info exchanged: ${nodeInfo.name} (${nodeInfo.version})');
+      logI('Node info exchanged: ${nodeInfo.name} (${nodeInfo.version})');
       
       // 4. 进行NAT穿透（如果需要）
       await _handleNATTraversal(socket, nodeInfo);
@@ -258,9 +259,9 @@ class P2PNetworkManager {
       
       // 8. 更新状态
       _p2pController.add(NetworkStatus.connected);
-      print('Successfully connected to peer: $peerAddress');
+      logI('Successfully connected to peer: $peerAddress');
     } catch (e) {
-      print('Failed to connect to peer: $peerAddress, error: $e');
+      logE('Failed to connect to peer: $peerAddress, error:', e);
       _p2pController.add(NetworkStatus.connectionFailed);
     }
   }
@@ -313,18 +314,18 @@ class P2PNetworkManager {
   
   // 处理NAT穿透
   Future<void> _handleNATTraversal(Socket socket, P2PNode nodeInfo) async {
-    print('Starting NAT traversal for node: ${nodeInfo.name} (${nodeInfo.address}:${nodeInfo.port})');
+    logI('Starting NAT traversal for node: ${nodeInfo.name} (${nodeInfo.address}:${nodeInfo.port})');
     
     try {
       // 1. 检测本地NAT类型
       final natType = await _detectNATType();
-      print('Detected NAT type: $natType');
+      logI('Detected NAT type: $natType');
       
       // 2. 尝试直接连接到远程节点
       bool directConnectionSuccess = await _attemptDirectConnection(nodeInfo);
       
       if (directConnectionSuccess) {
-        print('Direct connection successful, skipping NAT traversal');
+        logI('Direct connection successful, skipping NAT traversal');
         return;
       }
       
@@ -332,39 +333,39 @@ class P2PNetworkManager {
       bool stunSuccess = await _attemptSTUNConnection(nodeInfo);
       
       if (stunSuccess) {
-        print('STUN-assisted connection successful');
+        logI('STUN-assisted connection successful');
         return;
       }
       
       // 4. 如果STUN失败，尝试其他连接方式
-      print('STUN-assisted connection failed, trying alternative methods...');
+      logW('STUN-assisted connection failed, trying alternative methods...');
       
       // 尝试1: 尝试不同的端口范围
       bool portRangeSuccess = await _attemptPortRangeConnection(nodeInfo);
       if (portRangeSuccess) {
-        print('Port range connection successful');
+        logI('Port range connection successful');
         return;
       }
       
       // 尝试2: 尝试使用TCP连接作为备选
       bool tcpSuccess = await _attemptTCPConnection(nodeInfo);
       if (tcpSuccess) {
-        print('TCP connection successful');
+        logI('TCP connection successful');
         return;
       }
       
       // 尝试3: 尝试通过中间服务器进行中继连接
       bool relaySuccess = await _attemptRelayConnection(nodeInfo);
       if (relaySuccess) {
-        print('Relay connection successful');
+        logI('Relay connection successful');
         return;
       }
       
       // 所有尝试失败
-      print('All NAT traversal attempts failed');
+      logE('All NAT traversal attempts failed');
       throw Exception('Failed to establish P2P connection after all NAT traversal attempts');
     } catch (e) {
-      print('NAT traversal failed: $e');
+      logE('NAT traversal failed:', e);
       // 可以选择继续使用现有连接，或者抛出异常
     }
   }
@@ -398,7 +399,7 @@ class P2PNetworkManager {
       
       return false;
     } catch (e) {
-      print('Port range connection attempt failed: $e');
+      logE('Port range connection attempt failed:', e);
       return false;
     }
   }
@@ -424,7 +425,7 @@ class P2PNetworkManager {
       socket.close();
       return false;
     } catch (e) {
-      print('TCP connection attempt failed: $e');
+      logE('TCP connection attempt failed:', e);
       return false;
     }
   }
@@ -437,10 +438,10 @@ class P2PNetworkManager {
       await Future.delayed(const Duration(seconds: 2));
       
       // 模拟中继连接成功
-      print('Relay connection established through intermediate server');
+      logI('Relay connection established through intermediate server');
       return true;
     } catch (e) {
-      print('Relay connection attempt failed: $e');
+      logE('Relay connection attempt failed:', e);
       return false;
     }
   }
@@ -458,7 +459,7 @@ class P2PNetworkManager {
       final random = Random();
       return natTypes[random.nextInt(natTypes.length)];
     } catch (e) {
-      print('Failed to detect NAT type: $e');
+      logE('Failed to detect NAT type:', e);
       return 'Unknown';
     }
   }
@@ -466,7 +467,7 @@ class P2PNetworkManager {
   // 尝试直接连接
   Future<bool> _attemptDirectConnection(P2PNode nodeInfo) async {
     try {
-      print('Attempting direct connection to ${nodeInfo.address}:${nodeInfo.port}');
+      logI('Attempting direct connection to ${nodeInfo.address}:${nodeInfo.port}');
       
       // 尝试建立TCP连接
       final socket = await Socket.connect(
@@ -477,10 +478,10 @@ class P2PNetworkManager {
       
       // 连接成功，关闭套接字
       socket.close();
-      print('Direct connection successful');
+      logI('Direct connection successful');
       return true;
     } catch (e) {
-      print('Direct connection failed: $e');
+      logW('Direct connection failed: $e');
       return false;
     }
   }
@@ -488,7 +489,7 @@ class P2PNetworkManager {
   // 尝试使用STUN服务器
   Future<bool> _attemptSTUNConnection(P2PNode nodeInfo) async {
     try {
-      print('Attempting STUN-assisted connection');
+      logI('Attempting STUN-assisted connection');
       
       // 配置STUN服务器
       final stunServers = [
@@ -507,17 +508,17 @@ class P2PNetworkManager {
           if (stunResult != null) {
             publicIP = stunResult['ip'] as String;
             publicPort = stunResult['port'] as int;
-            print('STUN server $stunServer returned public IP: $publicIP:$publicPort');
+            logI('STUN server $stunServer returned public IP: $publicIP:$publicPort');
             break;
           }
         } catch (e) {
-          print('STUN server $stunServer failed: $e');
+          logE('STUN server $stunServer failed:', e);
         }
       }
       
       if (publicIP != null && publicPort != null) {
         // 使用公网IP尝试连接
-        print('Attempting connection using public IP: $publicIP:$publicPort');
+        logI('Attempting connection using public IP: $publicIP:$publicPort');
         
         final socket = await Socket.connect(
           publicIP,
@@ -526,14 +527,14 @@ class P2PNetworkManager {
         );
         
         socket.close();
-        print('STUN-assisted connection successful');
+        logI('STUN-assisted connection successful');
         return true;
       }
       
-      print('STUN-assisted connection failed: No valid STUN response');
+      logW('STUN-assisted connection failed: No valid STUN response');
       return false;
     } catch (e) {
-      print('STUN-assisted connection failed: $e');
+      logE('STUN-assisted connection failed:', e);
       return false;
     }
   }
@@ -556,25 +557,25 @@ class P2PNetworkManager {
   
   // 建立安全通道
   Future<void> _establishSecureChannel(Socket socket) async {
-    print('Starting secure channel establishment');
+    logI('Starting secure channel establishment');
     
     try {
       // 1. 简化实现：跳过RSA密钥生成，直接使用预定义的公钥
       // 2. 简化实现：跳过公钥交换
       // 3. 协商加密算法
       final encryptionAlgorithm = await _negotiateEncryptionAlgorithm(socket);
-      print('Negotiated encryption algorithm: $encryptionAlgorithm');
+      logI('Negotiated encryption algorithm: $encryptionAlgorithm');
       
       // 4. 生成会话密钥
       final sessionKey = _generateSessionKey();
-      print('Generated session key');
+      logI('Generated session key');
       
       // 5. 简化实现：跳过RSA加密，直接发送会话密钥
       await _sendSessionKey(socket, sessionKey);
-      print('Session key sent securely');
+      logI('Session key sent securely');
       
       // 6. 简化实现：跳过身份验证
-      print('Identity verification skipped for simplified implementation');
+      logW('Identity verification skipped for simplified implementation');
       
       // 7. 保存安全通道信息
       _secureChannels[socket.remoteAddress.address] = {
@@ -583,9 +584,9 @@ class P2PNetworkManager {
         'establishedAt': DateTime.now()
       };
       
-      print('Secure channel established successfully');
+      logI('Secure channel established successfully');
     } catch (e) {
-      print('Failed to establish secure channel: $e');
+      logE('Failed to establish secure channel:', e);
       throw Exception('Secure channel establishment failed: $e');
     }
   }
@@ -659,14 +660,14 @@ class P2PNetworkManager {
       try {
         // 1. 将二进制数据转换为字符串
         final messageStr = String.fromCharCodes(data);
-        print('Received raw message from $peerAddress: $messageStr');
+        logD('Received raw message from $peerAddress: $messageStr');
         
         // 2. 解析消息
         final message = jsonDecode(messageStr) as Map<String, dynamic>;
         
         // 3. 检查消息类型
         final messageType = message['type'] as String;
-        print('Processing message of type: $messageType from $peerAddress');
+        logI('Processing message of type: $messageType from $peerAddress');
         
         // 4. 处理不同类型的消息
         switch (messageType) {
@@ -701,20 +702,20 @@ class P2PNetworkManager {
             _handleErrorMessage(message, peerAddress);
             break;
           default:
-            print('Unknown message type: $messageType from $peerAddress');
+            logW('Unknown message type: $messageType from $peerAddress');
             _handleUnknownMessage(message, peerAddress);
         }
       } catch (e) {
-        print('Failed to process message from $peerAddress: $e');
+        logE('Failed to process message from $peerAddress:', e);
         
         // 发送错误响应
         _sendErrorMessage(socket, 'Failed to parse message: $e');
       }
     }, onError: (error) {
-      print('Error on socket from $peerAddress: $error');
+      logE('Error on socket from $peerAddress:', error);
       _handleSocketError(socket, peerAddress);
     }, onDone: () {
-      print('Socket from $peerAddress closed');
+      logI('Socket from $peerAddress closed');
       _handleSocketClose(socket, peerAddress);
     });
   }
@@ -727,7 +728,7 @@ class P2PNetworkManager {
     final sender = message['sender'] as String? ?? peerAddress;
     final timestamp = message['timestamp'] as int? ?? DateTime.now().millisecondsSinceEpoch;
     
-    print('Chat message from $sender: $content (${DateTime.fromMillisecondsSinceEpoch(timestamp)})');
+    logI('Chat message from $sender: $content (${DateTime.fromMillisecondsSinceEpoch(timestamp)})');
     
     // 实际应用中应该将消息转发给UI或其他组件
   }
@@ -738,7 +739,7 @@ class P2PNetworkManager {
     final fileSize = message['fileSize'] as int;
     final transferId = message['transferId'] as String;
     
-    print('File transfer request from $peerAddress: $fileName ($fileSize bytes) with ID: $transferId');
+    logI('File transfer request from $peerAddress: $fileName ($fileSize bytes) with ID: $transferId');
     
     // 实际应用中应该显示确认对话框，然后发送响应
     final response = {
@@ -758,10 +759,10 @@ class P2PNetworkManager {
     final responseMessage = message['message'] as String?;
     
     if (accepted) {
-      print('File transfer accepted by $peerAddress for ID: $transferId');
+      logI('File transfer accepted by $peerAddress for ID: $transferId');
       // 开始发送文件数据
     } else {
-      print('File transfer rejected by $peerAddress for ID: $transferId. Reason: $responseMessage');
+      logW('File transfer rejected by $peerAddress for ID: $transferId. Reason: $responseMessage');
     }
   }
   
@@ -773,11 +774,11 @@ class P2PNetworkManager {
     final chunkData = base64.decode(message['data'] as String);
     final isLastChunk = message['isLastChunk'] as bool? ?? false;
     
-    print('Received file chunk $chunkIndex/$totalChunks for transfer $transferId from $peerAddress (${chunkData.length} bytes)');
+    logI('Received file chunk $chunkIndex/$totalChunks for transfer $transferId from $peerAddress (${chunkData.length} bytes)');
     
     // 实际应用中应该将文件块保存到临时文件，并在所有块接收完成后合并
     if (isLastChunk) {
-      print('All chunks received for transfer $transferId from $peerAddress');
+      logI('All chunks received for transfer $transferId from $peerAddress');
     }
   }
   
@@ -785,7 +786,7 @@ class P2PNetworkManager {
   void _handlePingMessage(Map<String, dynamic> message, Socket socket, String peerAddress) {
     final timestamp = message['timestamp'] as int? ?? DateTime.now().millisecondsSinceEpoch;
     
-    print('Received ping from $peerAddress');
+    logD('Received ping from $peerAddress');
     
     // 发送Pong响应
     final pongResponse = {
@@ -803,7 +804,7 @@ class P2PNetworkManager {
     final responseTimestamp = message['responseTimestamp'] as int;
     
     final ping = responseTimestamp - requestTimestamp;
-    print('Received pong from $peerAddress. Ping: $ping ms');
+    logI('Received pong from $peerAddress. Ping: $ping ms');
     
     // 更新节点的ping值
     final nodeIndex = _nodes.indexWhere((node) => node.address == peerAddress.split(':')[0]);
@@ -825,7 +826,7 @@ class P2PNetworkManager {
     final senderName = message['name'] as String? ?? 'Unknown';
     final senderVersion = message['version'] as String? ?? 'Unknown';
     
-    print('Received peer discovery message from $senderName ($senderVersion) at $peerAddress');
+    logI('Received peer discovery message from $senderName ($senderVersion) at $peerAddress');
     
     // 发送节点信息响应
     final peerInfoResponse = {
@@ -846,7 +847,7 @@ class P2PNetworkManager {
     final nodeAddress = message['address'] as String;
     final nodePort = message['port'] as int;
     
-    print('Received peer info: $nodeName ($nodeVersion) at $nodeAddress:$nodePort');
+    logI('Received peer info: $nodeName ($nodeVersion) at $nodeAddress:$nodePort');
     
     // 更新或添加节点到列表
     final existingNodeIndex = _nodes.indexWhere((node) => node.address == nodeAddress && node.port == nodePort);
@@ -881,7 +882,7 @@ class P2PNetworkManager {
     final status = message['status'] as String;
     final details = message['details'] as Map<String, dynamic>?;
     
-    print('Network status update from $peerAddress: $status ${details != null ? '($details)' : ''}');
+    logI('Network status update from $peerAddress: $status ${details != null ? '($details)' : ''}');
     
     // 更新节点的网络状态
     final nodeIndex = _nodes.indexWhere((node) => node.address == peerAddress.split(':')[0]);
@@ -896,12 +897,12 @@ class P2PNetworkManager {
     final errorMessage = message['message'] as String;
     final details = message['details'] as String?;
     
-    print('Error message from $peerAddress: Code $errorCode - $errorMessage ${details != null ? '($details)' : ''}');
+    logE('Error message from $peerAddress: Code $errorCode - $errorMessage ${details != null ? '($details)' : ''}');
   }
   
   // 处理未知消息类型
   void _handleUnknownMessage(Map<String, dynamic> message, String peerAddress) {
-    print('Unknown message type received from $peerAddress: ${message['type']}');
+    logW('Unknown message type received from $peerAddress: ${message['type']}');
     
     // 可以选择发送错误响应
   }
@@ -941,7 +942,7 @@ class P2PNetworkManager {
   
   // 断开连接
   Future<void> disconnect() async {
-    print('Starting disconnect process');
+    logI('Starting disconnect process');
     
     try {
       // 1. 向所有连接的节点发送断开连接通知
@@ -952,23 +953,23 @@ class P2PNetworkManager {
       
       // 3. 清理安全通道信息
       _secureChannels.clear();
-      print('Secure channels cleared');
+      logI('Secure channels cleared');
       
       // 4. 清理节点列表
       _nodes.clear();
       _nodesController.add(List.from(_nodes));
-      print('Node list cleared');
+      logI('Node list cleared');
       
       // 5. 更新网络状态
       _p2pController.add(NetworkStatus.disconnected);
-      print('Network status updated to disconnected');
+      logI('Network status updated to disconnected');
       
       // 6. 清理其他资源
       _cleanupResources();
       
-      print('Disconnect process completed successfully');
+      logI('Disconnect process completed successfully');
     } catch (e) {
-      print('Failed to disconnect properly: $e');
+      logE('Failed to disconnect properly:', e);
       
       // 即使出现错误，也要确保资源被清理
       _nodes.clear();
@@ -979,7 +980,7 @@ class P2PNetworkManager {
   
   // 断开与特定节点的连接
   Future<void> disconnectFromPeer(String peerAddress) async {
-    print('Disconnecting from peer: $peerAddress');
+    logI('Disconnecting from peer: $peerAddress');
     
     try {
       // 1. 检查连接是否存在
@@ -1002,17 +1003,17 @@ class P2PNetworkManager {
         _nodes.removeWhere((node) => '${node.address}:${node.port}' == peerAddress);
         _nodesController.add(List.from(_nodes));
         
-        print('Successfully disconnected from peer: $peerAddress');
+        logI('Successfully disconnected from peer: $peerAddress');
         
         // 7. 如果没有活跃连接，更新网络状态
         if (_activeConnections.isEmpty) {
           _p2pController.add(NetworkStatus.disconnected);
         }
       } else {
-        print('No active connection found for peer: $peerAddress');
+        logW('No active connection found for peer: $peerAddress');
       }
     } catch (e) {
-      print('Failed to disconnect from peer $peerAddress: $e');
+      logE('Failed to disconnect from peer $peerAddress:', e);
       
       // 确保资源被清理
       _activeConnections.remove(peerAddress);
@@ -1023,7 +1024,7 @@ class P2PNetworkManager {
   
   // 通知所有节点断开连接
   Future<void> _notifyPeersOfDisconnection() async {
-    print('Notifying all peers of disconnection');
+    logI('Notifying all peers of disconnection');
     
     // 创建连接副本以避免并发修改
     final connectionsCopy = Map.from(_activeConnections);
@@ -1035,7 +1036,7 @@ class P2PNetworkManager {
       try {
         await _sendDisconnectNotification(socket, peerAddress);
       } catch (e) {
-        print('Failed to notify peer $peerAddress of disconnection: $e');
+        logE('Failed to notify peer $peerAddress of disconnection:', e);
         // 继续处理其他连接
       }
     }
@@ -1051,19 +1052,19 @@ class P2PNetworkManager {
       };
       
       socket.add(Uint8List.fromList(utf8.encode(jsonEncode(disconnectMessage))));
-      print('Sent disconnect notification to $peerAddress');
+      logI('Sent disconnect notification to $peerAddress');
       
       // 等待短暂时间，确保消息发送完成
       await Future.delayed(const Duration(milliseconds: 100));
     } catch (e) {
-      print('Failed to send disconnect notification to $peerAddress: $e');
+      logE('Failed to send disconnect notification to $peerAddress:', e);
       rethrow;
     }
   }
   
   // 关闭所有连接
   Future<void> _closeAllConnections() async {
-    print('Closing all active connections');
+    logI('Closing all active connections');
     
     // 创建连接副本以避免并发修改
     final connectionsCopy = Map.from(_activeConnections);
@@ -1074,30 +1075,30 @@ class P2PNetworkManager {
       
       try {
         socket.close();
-        print('Closed connection to $peerAddress');
+        logI('Closed connection to $peerAddress');
       } catch (e) {
-        print('Failed to close connection to $peerAddress: $e');
+        logE('Failed to close connection to $peerAddress:', e);
         // 继续处理其他连接
       }
     }
     
     // 清空活跃连接列表
     _activeConnections.clear();
-    print('All connections closed');
+    logI('All connections closed');
   }
   
   // 清理资源
   void _cleanupResources() {
     // 清理其他资源，如定时器、监听器等
     // 示例：如果有定期Ping定时器，可以在这里取消
-    print('Additional resources cleaned up');
+    logI('Additional resources cleaned up');
   }
   
   // 删除重复的方法定义，保留现有的实现
   
   // 发送消息到指定节点
   Future<void> sendMessage(String peerAddress, dynamic message, {String? messageType = 'chat'}) async {
-    print('Sending $messageType message to $peerAddress');
+    logI('Sending $messageType message to $peerAddress');
     
     try {
       // 1. 准备消息数据
@@ -1112,9 +1113,9 @@ class P2PNetworkManager {
         await _sendMessageViaHTTP(peerAddress, preparedMessage);
       }
       
-      print('Successfully sent $messageType message to $peerAddress');
+      logI('Successfully sent $messageType message to $peerAddress');
     } catch (e) {
-      print('Failed to send $messageType message to $peerAddress: $e');
+      logE('Failed to send $messageType message to $peerAddress:', e);
       
       // 3. 尝试重试（最多3次）
       await _retrySendMessage(peerAddress, message, messageType);
@@ -1152,9 +1153,9 @@ class P2PNetworkManager {
       
       // 发送消息
       socket.add(Uint8List.fromList(utf8.encode(messageJson)));
-      print('Message sent via TCP to $peerAddress: $messageJson');
+      logD('Message sent via TCP to $peerAddress: $messageJson');
     } catch (e) {
-      print('Failed to send message via TCP to $peerAddress: $e');
+      logE('Failed to send message via TCP to $peerAddress:', e);
       rethrow;
     }
   }
@@ -1176,12 +1177,12 @@ class P2PNetworkManager {
       
       // 检查响应状态
       if (response.statusCode == 200) {
-        print('Message sent successfully via HTTP to $peerAddress');
+        logI('Message sent successfully via HTTP to $peerAddress');
       } else {
         throw Exception('HTTP request failed with status: ${response.statusCode}');
       }
     } catch (e) {
-      print('Failed to send message via HTTP to $peerAddress: $e');
+      logE('Failed to send message via HTTP to $peerAddress:', e);
       rethrow;
     }
   }
@@ -1191,13 +1192,13 @@ class P2PNetworkManager {
     const maxRetries = 3;
     
     if (retryCount >= maxRetries) {
-      print('Maximum retry attempts reached for sending message to $peerAddress');
+      logE('Maximum retry attempts reached for sending message to $peerAddress');
       return;
     }
     
     // 等待一段时间后重试
     final delay = Duration(milliseconds: 1000 * (retryCount + 1));
-    print('Retrying message send to $peerAddress in ${delay.inMilliseconds}ms (attempt ${retryCount + 1}/$maxRetries)');
+    logW('Retrying message send to $peerAddress in ${delay.inMilliseconds}ms (attempt ${retryCount + 1}/$maxRetries)');
     
     await Future.delayed(delay);
     
@@ -1277,6 +1278,6 @@ class P2PNetworkManager {
     // 清理安全通道
     _secureChannels.clear();
     
-    print('P2PNetworkManager disposed successfully');
+    logI('P2PNetworkManager disposed successfully');
   }
 }

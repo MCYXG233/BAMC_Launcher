@@ -440,11 +440,18 @@ class _PackManagementViewState extends State<PackManagementView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Windows风格的AppBar
       appBar: AppBar(
         title: const Text('整合包管理'),
+        elevation: 1,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        shadowColor: Colors.grey.withOpacity(0.2),
       ),
+      // 纯色背景，更符合Windows桌面软件风格
+      backgroundColor: const Color(0xFFF5F5F5),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -452,45 +459,114 @@ class _PackManagementViewState extends State<PackManagementView> {
             const Text(
               '整合包导入与创建',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
+                color: Colors.black,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             const Text(
               '支持多种整合包格式，一键导入或创建属于你的整合包',
               style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF6B7280),
+                fontSize: 14,
+                color: Color(0xFF6E6E6E),
               ),
             ),
             const SizedBox(height: 24),
             
-            // 导入整合包卡片
-            AnimeCard(
-              title: '导入整合包',
-              subtitle: '支持 .bamcpack, .pclpack, .mrpack, .zip, .7z 格式',
-              icon: const Icon(
-                Icons.upload_file,
-                size: 40,
-                color: Color(0xFF3B82F6),
+            // 操作按钮区 - 顶部放置，更符合桌面软件习惯
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      onPressed: _isImporting ? null : _importPack,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0078D4),
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.upload_file, size: 18),
+                          const SizedBox(width: 6),
+                          Text(_isImporting ? '导入中...' : '导入整合包'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 36,
+                    child: ElevatedButton(
+                      onPressed: _isCreating ? null : () => _createPack(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0078D4),
+                        foregroundColor: Colors.white,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.add, size: 18),
+                          const SizedBox(width: 6),
+                          Text(_isCreating ? '创建中...' : '创建整合包'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 36,
+                    child: OutlinedButton(
+                      onPressed: _isCreating ? null : () => _compressToBamcPack(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF0078D4),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        side: const BorderSide(color: Color(0xFF0078D4)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.compress, size: 18),
+                          const SizedBox(width: 6),
+                          Text(_isCreating ? '压缩中...' : '压缩为 .bamcpack'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              onTap: _isImporting ? null : _importPack,
             ),
-            const SizedBox(height: 16),
             
             // 导入状态显示
             if (_isImporting) ...[
-              const LinearProgressIndicator(),
+              const LinearProgressIndicator(
+                backgroundColor: Color(0xFFE0E0E0),
+                color: Color(0xFF0078D4),
+                minHeight: 8,
+              ),
               const SizedBox(height: 8),
               Text(
                 '正在导入: $_selectedPackPath',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF6B7280),
+                  color: Color(0xFF6E6E6E),
                 ),
               ),
+              const SizedBox(height: 16),
             ],
             
             // 检测到的格式显示
@@ -500,51 +576,46 @@ class _PackManagementViewState extends State<PackManagementView> {
                 '检测到格式: ${_detectedFormat.name}',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF34D399),
+                  color: Color(0xFF0078D4),
                   fontWeight: FontWeight.w500,
                 ),
               ),
+              const SizedBox(height: 16),
             ],
             
-            const SizedBox(height: 24),
-            
-            // 创建整合包卡片
-            const AnimeCard(
-              title: '创建新整合包',
-              subtitle: '选择游戏版本和加载器类型，创建属于你的整合包',
-              icon: Icon(
-                Icons.add_box,
-                size: 40,
-                color: Color(0xFF34D399),
+            // 创建整合包表单 - Windows风格卡片
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(0xFFE0E0E0)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 0,
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
-              onTap: null,
-            ),
-            const SizedBox(height: 16),
-            
-            // 创建整合包表单
-            _buildCreatePackForm(),
-            const SizedBox(height: 24),
-            
-            // 创建按钮
-            SizedBox(
-              width: double.infinity,
-              child: AnimeButton(
-                text: _isCreating ? '创建中...' : '创建整合包',
-                onPressed: _isCreating ? null : () => _createPack(),
-                isPrimary: true,
-                leadingIcon: const Icon(Icons.create),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // 压缩为.bamcpack按钮
-            SizedBox(
-              width: double.infinity,
-              child: AnimeButton(
-                text: _isCreating ? '压缩中...' : '压缩为 .bamcpack',
-                onPressed: _isCreating ? null : () => _compressToBamcPack(),
-                isPrimary: false,
-                leadingIcon: const Icon(Icons.compress),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 表单标题
+                  const Text(
+                    '创建新整合包',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  // 创建整合包表单
+                  _buildCreatePackForm(),
+                ],
               ),
             ),
             const SizedBox(height: 24),
@@ -553,22 +624,22 @@ class _PackManagementViewState extends State<PackManagementView> {
             const Text(
               '支持的整合包格式',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF1E3A8A),
+                color: Colors.black,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             
-            // 格式列表
+            // 格式列表 - Windows风格标签
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
-                _buildFormatChip('.bamcpack', 'BAMCLauncher 专有格式', const Color(0xFF1E3A8A)),
+                _buildFormatChip('.bamcpack', 'BAMCLauncher 专有格式', const Color(0xFF0078D4)),
                 _buildFormatChip('.pclpack', 'PCL 启动器格式', const Color(0xFFF59E0B)),
-                _buildFormatChip('.mrpack', 'Modrinth 格式', const Color(0xFF34D399)),
-                _buildFormatChip('.zip/.7z', '传统压缩包格式', const Color(0xFFF472B6)),
+                _buildFormatChip('.mrpack', 'Modrinth 格式', const Color(0xFF10B981)),
+                _buildFormatChip('.zip/.7z', '传统压缩包格式', const Color(0xFFEC4899)),
               ],
             ),
           ],
@@ -579,159 +650,182 @@ class _PackManagementViewState extends State<PackManagementView> {
   
   // 构建创建整合包表单
   Widget _buildCreatePackForm() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 整合包名称
-          const Text(
-            '整合包名称',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
-            ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 整合包名称
+        const Text(
+          '整合包名称',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
           ),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: '输入整合包名称',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              filled: true,
-              fillColor: Color(0xFFF9FAFB),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          decoration: InputDecoration(
+            hintText: '输入整合包名称',
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFFB3B3B3)),
             ),
-            onChanged: (value) {
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFF0078D4)),
+            ),
+            filled: false,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          ),
+          onChanged: (value) {
+            setState(() {
+              _packName = value;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        
+        // 整合包描述
+        const Text(
+          '整合包描述',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          decoration: InputDecoration(
+            hintText: '输入整合包描述',
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFFB3B3B3)),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFF0078D4)),
+            ),
+            filled: false,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          ),
+          maxLines: 3,
+          onChanged: (value) {
+            setState(() {
+              _packDescription = value;
+            });
+          },
+        ),
+        const SizedBox(height: 16),
+        
+        // 游戏版本选择
+        const Text(
+          '游戏版本',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: _selectedGameVersion,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFFB3B3B3)),
+            ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFF0078D4)),
+            ),
+            filled: false,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          ),
+          items: _gameVersions.map((version) {
+            return DropdownMenuItem(
+              value: version,
+              child: Text(version),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
               setState(() {
-                _packName = value;
+                _selectedGameVersion = value;
               });
-            },
+            }
+          },
+        ),
+        const SizedBox(height: 16),
+        
+        // 加载器类型选择
+        const Text(
+          '加载器类型',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
           ),
-          const SizedBox(height: 16),
-          
-          // 整合包描述
-          const Text(
-            '整合包描述',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          initialValue: _selectedLoaderType,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFFB3B3B3)),
             ),
+            focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(3)),
+              borderSide: BorderSide(color: Color(0xFF0078D4)),
+            ),
+            filled: false,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: const InputDecoration(
-              hintText: '输入整合包描述',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              filled: true,
-              fillColor: Color(0xFFF9FAFB),
-            ),
-            maxLines: 3,
-            onChanged: (value) {
+          items: _loaderTypes.map((loader) {
+            return DropdownMenuItem(
+              value: loader,
+              child: Text(loader),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) {
               setState(() {
-                _packDescription = value;
+                _selectedLoaderType = value;
               });
-            },
-          ),
-          const SizedBox(height: 16),
-          
-          // 游戏版本选择
-          const Text(
-            '游戏版本',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
-            ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedGameVersion,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              filled: true,
-              fillColor: Color(0xFFF9FAFB),
-            ),
-            items: _gameVersions.map((version) {
-              return DropdownMenuItem(
-                value: version,
-                child: Text(version),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _selectedGameVersion = value;
-                });
-              }
-            },
-          ),
-          const SizedBox(height: 16),
-          
-          // 加载器类型选择
-          const Text(
-            '加载器类型',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1F2937),
-            ),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            initialValue: _selectedLoaderType,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              filled: true,
-              fillColor: Color(0xFFF9FAFB),
-            ),
-            items: _loaderTypes.map((loader) {
-              return DropdownMenuItem(
-                value: loader,
-                child: Text(loader),
-              );
-            }).toList(),
-            onChanged: (value) {
-              if (value != null) {
-                setState(() {
-                  _selectedLoaderType = value;
-                });
-              }
-            },
-          ),
-        ],
-      ),
+            }
+          },
+        ),
+      ],
     );
   }
   
-  // 构建格式标签
+  // 构建格式标签 - Windows风格
   Widget _buildFormatChip(String extension, String description, Color color) {
-    return Chip(
-      label: Text(
-        extension,
-        style: const TextStyle(
-          color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.only(right: 8, bottom: 8),
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(3),
         ),
-      ),
-      backgroundColor: color,
-      avatar: CircleAvatar(
-        backgroundColor: Colors.white.withValues(alpha: 0.2 * 255),
-        child: Text(
-          extension[1],
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-          ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              extension[1].toUpperCase(),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              extension,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       ),
     );

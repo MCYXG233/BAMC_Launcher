@@ -1,11 +1,192 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:archive/archive.dart';
+import 'package:bamclauncher/services/pack_format_detector.dart';
+import 'package:bamclauncher/services/bamc_pack_compressor.dart';
 import 'package:bamclauncher/models/instance_model.dart';
 import 'package:bamclauncher/utils/file_path_utils.dart';
 import 'package:bamclauncher/utils/logger.dart';
+import 'package:bamclauncher/services/pack_format_detector.dart';
 
 // 实例管理服务
 class InstanceManager {
+  final PackFormatDetector _packFormatDetector = PackFormatDetector();
+  final BamcPackCompressor _bamcPackCompressor = BamcPackCompressor();
+  
+  // 从整合包导入实例
+  Future<InstanceModel> importFromPack(String packPath) async {
+    try {
+      // 检测整合包格式
+      final format = await _packFormatDetector.detectFormat(packPath);
+      logI('Detected pack format: $format');
+      
+      // 生成实例名称和目录
+      final instanceName = _generateInstanceNameFromPack(packPath);
+      final instancesDir = await FilePathUtils.getInstancesDirectory();
+      final instanceDir = '$instancesDir/$instanceName';
+      
+      // 根据格式导入整合包
+      switch (format) {
+        case PackFormat.bamcpack:
+          // 使用BamcPackCompressor解压.bamcpack格式
+          await _bamcPackCompressor.decompress(packPath, instanceDir);
+          break;
+          
+        case PackFormat.pclpack:
+        case PackFormat.mrpack:
+        case PackFormat.mcbbs:
+          // 假设是zip格式，使用默认解压
+          await _extractZipFile(packPath, instanceDir);
+          break;
+          
+        default:
+          throw Exception('Unsupported pack format: $format');
+      }
+      
+      // 创建实例配置文件
+      final instance = await _createInstanceFromPack(instanceDir, instanceName, format);
+      
+      logI('Pack imported successfully to: $instanceDir');
+      return instance;
+    } catch (e) {
+      logE('Failed to import pack: $packPath, error:', e);
+      rethrow;
+    }
+  }
+  
+  // 将实例导出为整合包
+  Future<String> exportToPack(InstanceModel instance, String outputPath) async {
+    try {
+      // 创建整合包元数据文件
+      final metadata = {
+        'name': instance.name,
+        'description': 'Exported from BAMCLauncher',
+        'gameVersion': instance.minecraftVersion,
+        'loaderType': instance.loaderType,
+        'loaderVersion': instance.loaderVersion,
+        'author': 'BAMCLauncher',
+        'version': '1.0.0',
+        'createdAt': DateTime.now().toIso8601String(),
+      };
+      
+      final metadataFile = File('${instance.instanceDir}/metadata.json');
+      await metadataFile.writeAsString(jsonEncode(metadata));
+      
+      // 使用BamcPackCompressor压缩为.bamcpack格式
+      await _bamcPackCompressor.compress(instance.instanceDir, outputPath);
+      
+      logI('Instance exported to pack: $outputPath');
+      return outputPath;
+    } catch (e) {
+      logE('Failed to export instance to pack: ${instance.name}, error:', e);
+      rethrow;
+    }
+  }
+  
+  // 从整合包创建实例
+  Future<InstanceModel> _createInstanceFromPack(String instanceDir, String instanceName, PackFormat format) async {
+    try {
+      // 检查是否存在metadata.json文件
+      final metadataFile = File('$instanceDir/metadata.json');
+      Map<String, dynamic> metadata = {};
+      
+      if (metadataFile.existsSync()) {
+        // 读取metadata.json文件
+        final metadataContent = await metadataFile.readAsString();
+        metadata = jsonDecode(metadataContent);
+      }
+      
+      // 检查是否存在instance.json文件
+      final instanceJsonFile = File('$instanceDir/instance.json');
+      if (instanceJsonFile.existsSync()) {
+        // 读取已存在的instance.json文件
+        final instanceContent = await instanceJsonFile.readAsString();
+        final instanceJson = jsonDecode(instanceContent) as Map<String, dynamic>;
+        return InstanceModel.fromJson(instanceJson);
+      }
+      
+      // 创建新的实例配置
+      final instance = InstanceModel(
+        id: instanceName,
+        name: metadata['name'] ?? instanceName,
+        minecraftVersion: metadata['gameVersion'] ?? '1.20.4',
+        loaderType: metadata['loaderType'] ?? 'vanilla',
+        loaderVersion: metadata['loaderVersion'] ?? 'latest',
+        javaPath: '',
+        allocatedMemory: 2048,
+        jvmArguments: [],
+        gameArguments: [],
+        instanceDir: instanceDir,
+        iconPath: '',
+        isActive: false,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        userId: '',
+        accessToken: '',
+        userType: 'mojang',
+      );
+      
+      // 写入instance.json文件
+      final jsonString = jsonEncode(instance.toJson());
+      await instanceJsonFile.writeAsString(jsonString);
+      
+      return instance;
+    } catch (e) {
+      logE('Failed to create instance from pack: $e');
+      rethrow;
+    }
+  }
+  
+  // 从整合包路径生成实例名称
+  String _generateInstanceNameFromPack(String packPath) {
+    // 提取文件名（不包含扩展名）
+    final fileName = packPath.split(Platform.pathSeparator).last;
+    final nameWithoutExtension = fileName.split('.').first;
+    
+    // 添加时间戳避免重名
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    return '$nameWithoutExtension$timestamp';
+  }
+  
+  // 解压zip文件
+  Future<void> _extractZipFile(String zipPath, String destDir) async {
+    try {
+      // 使用archive库解压文件
+      final zipFile = File(zipPath);
+      final bytes = await zipFile.readAsBytes();
+      
+      // 尝试使用ZipDecoder解压
+      final archive = ZipDecoder().decodeBytes(bytes);
+      
+      // 创建目标目录
+      final destination = Directory(destDir);
+      if (!destination.existsSync()) {
+        destination.createSync(recursive: true);
+      }
+      
+      // 解压所有文件
+      for (final file in archive.files) {
+        if (file.isFile) {
+          final filePath = '$destDir/${file.name}';
+          final outputFile = File(filePath);
+          
+          // 创建父目录
+          final parentDir = outputFile.parent;
+          if (!parentDir.existsSync()) {
+            parentDir.createSync(recursive: true);
+          }
+          
+          // 写入文件
+          await outputFile.writeAsBytes(file.content as List<int>);
+        }
+      }
+      
+      logI('Successfully extracted $zipPath to $destDir');
+    } catch (e) {
+      logE('Failed to extract $zipPath:', e);
+      rethrow;
+    }
+  }
   // 获取所有实例
   Future<List<InstanceModel>> getAllInstances() async {
     final instancesDir = await FilePathUtils.getInstancesDirectory();
@@ -36,6 +217,236 @@ class InstanceManager {
     }
     
     return instances;
+  }
+  
+  // 扫描Minecraft目录，自动识别实例
+  Future<List<InstanceModel>> scanMinecraftDirectoryForInstances(String minecraftDir) async {
+    final instances = <InstanceModel>[];
+    
+    // 检查Minecraft目录是否存在
+    final dir = Directory(minecraftDir);
+    if (!dir.existsSync()) {
+      logW('Minecraft directory does not exist: $minecraftDir');
+      return instances;
+    }
+    
+    // 扫描versions目录，查找所有版本
+    final versionsDir = Directory('$minecraftDir/versions');
+    if (versionsDir.existsSync()) {
+      final versionDirs = versionsDir.listSync().whereType<Directory>().toList();
+      
+      for (final versionDir in versionDirs) {
+        try {
+          // 检查是否存在版本json文件
+          final versionName = versionDir.path.split(Platform.pathSeparator).last;
+          final versionJsonFile = File('${versionDir.path}/$versionName.json');
+          
+          if (versionJsonFile.existsSync()) {
+            logI('Found Minecraft version: $versionName');
+            
+            // 解析版本json，提取信息
+            final jsonString = await versionJsonFile.readAsString();
+            final versionJson = jsonDecode(jsonString) as Map<String, dynamic>;
+            
+            // 检测加载器类型
+            final loaderInfo = _detectLoaderType(versionJson);
+            
+            // 创建实例模型
+            final instance = InstanceModel(
+              id: versionName,
+              name: versionName,
+              minecraftVersion: versionName,
+              loaderType: loaderInfo['type'] as String,
+              loaderVersion: loaderInfo['version'] as String,
+              javaPath: '',
+              allocatedMemory: 2048,
+              jvmArguments: [],
+              gameArguments: [],
+              instanceDir: minecraftDir,
+              iconPath: '',
+              isActive: false,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+            
+            instances.add(instance);
+            logI('Created instance for version: $versionName, loader: ${loaderInfo['type']} ${loaderInfo['version']}');
+          }
+        } catch (e) {
+          logE('Failed to scan version: ${versionDir.path}, error:', e);
+        }
+      }
+    }
+    
+    return instances;
+  }
+  
+  // 检测加载器类型
+  Map<String, dynamic> _detectLoaderType(Map<String, dynamic> versionJson) {
+    final loaderInfo = {
+      'type': 'vanilla',
+      'version': '',
+    };
+    
+    // 检查是否为Forge
+    if (versionJson.containsKey('forgeVersion')) {
+      loaderInfo['type'] = 'forge';
+      loaderInfo['version'] = versionJson['forgeVersion'] as String;
+    } 
+    // 检查是否为Fabric
+    else if (versionJson.containsKey('fabricLoader') || 
+             versionJson.containsKey('fabric-loader') ||
+             versionJson.containsKey('arguments') ||
+             (versionJson.containsKey('mainClass') && 
+              (versionJson['mainClass'] as String).contains('fabric'))) {
+      loaderInfo['type'] = 'fabric';
+      
+      // 尝试提取Fabric版本
+      if (versionJson.containsKey('fabricLoader')) {
+        loaderInfo['version'] = versionJson['fabricLoader'] as String;
+      } else if (versionJson.containsKey('fabric-loader')) {
+        loaderInfo['version'] = versionJson['fabric-loader'] as String;
+      } else {
+        // 从mainClass或其他字段中提取版本信息
+        final mainClass = versionJson['mainClass'] as String;
+        if (mainClass.contains('fabric')) {
+          // 尝试从id字段提取版本
+          if (versionJson.containsKey('id')) {
+            final id = versionJson['id'] as String;
+            if (id.contains('fabric')) {
+              final parts = id.split('-fabric-');
+              if (parts.length > 1) {
+                loaderInfo['version'] = parts[1];
+              }
+            }
+          }
+        }
+      }
+    }
+    // 检查是否为Quilt
+    else if ((versionJson.containsKey('mainClass') && 
+             (versionJson['mainClass'] as String).contains('quilt')) ||
+             versionJson.containsKey('quiltLoader')) {
+      loaderInfo['type'] = 'quilt';
+      
+      // 尝试提取Quilt版本
+      if (versionJson.containsKey('quiltLoader')) {
+        loaderInfo['version'] = versionJson['quiltLoader'] as String;
+      } else {
+        // 从id字段提取版本
+        if (versionJson.containsKey('id')) {
+          final id = versionJson['id'] as String;
+          if (id.contains('quilt')) {
+            final parts = id.split('-quilt-');
+            if (parts.length > 1) {
+              loaderInfo['version'] = parts[1];
+            }
+          }
+        }
+      }
+    }
+    // 检查是否为OptiFine
+    else if (versionJson.containsKey('id') &&
+             (versionJson['id'] as String).contains('optifine')) {
+      loaderInfo['type'] = 'optifine';
+      
+      // 尝试提取OptiFine版本
+      final id = versionJson['id'] as String;
+      final parts = id.split('-OptiFine_');
+      if (parts.length > 1) {
+        loaderInfo['version'] = parts[1];
+      }
+    }
+    
+    return loaderInfo;
+  }
+  
+  // 导入外部实例到BAMCLauncher
+  Future<InstanceModel> importExternalInstance(InstanceModel externalInstance) async {
+    final instancesDir = await FilePathUtils.getInstancesDirectory();
+    final newInstanceDir = Directory('$instancesDir/${externalInstance.id}');
+    
+    // 创建实例目录
+    if (!newInstanceDir.existsSync()) {
+      newInstanceDir.createSync(recursive: true);
+    }
+    
+    // 复制必要文件
+    await _copyInstanceFiles(externalInstance.instanceDir, newInstanceDir.path, externalInstance.minecraftVersion);
+    
+    // 保存实例配置
+    final instanceJsonFile = File('${newInstanceDir.path}/instance.json');
+    final updatedInstance = externalInstance.copyWith(
+      instanceDir: newInstanceDir.path,
+      updatedAt: DateTime.now(),
+    );
+    
+    final jsonString = jsonEncode(updatedInstance.toJson());
+    await instanceJsonFile.writeAsString(jsonString);
+    
+    logI('Successfully imported instance: ${externalInstance.name}');
+    return updatedInstance;
+  }
+  
+  // 复制实例文件
+  Future<void> _copyInstanceFiles(String sourceDir, String targetDir, String version) async {
+    // 复制versions目录
+    final sourceVersionsDir = Directory('$sourceDir/versions/$version');
+    final targetVersionsDir = Directory('$targetDir/versions/$version');
+    
+    if (sourceVersionsDir.existsSync()) {
+      await _copyDirectory(sourceVersionsDir, targetVersionsDir);
+    }
+    
+    // 复制libraries目录（如果存在）
+    final sourceLibrariesDir = Directory('$sourceDir/libraries');
+    final targetLibrariesDir = Directory('$targetDir/libraries');
+    
+    if (sourceLibrariesDir.existsSync()) {
+      await _copyDirectory(sourceLibrariesDir, targetLibrariesDir);
+    }
+    
+    // 复制assets目录（如果存在）
+    final sourceAssetsDir = Directory('$sourceDir/assets');
+    final targetAssetsDir = Directory('$targetDir/assets');
+    
+    if (sourceAssetsDir.existsSync()) {
+      await _copyDirectory(sourceAssetsDir, targetAssetsDir);
+    }
+    
+    // 复制config目录（如果存在）
+    final sourceConfigDir = Directory('$sourceDir/config');
+    final targetConfigDir = Directory('$targetDir/config');
+    
+    if (sourceConfigDir.existsSync()) {
+      await _copyDirectory(sourceConfigDir, targetConfigDir);
+    }
+    
+    // 复制mods目录（如果存在）
+    final sourceModsDir = Directory('$sourceDir/mods');
+    final targetModsDir = Directory('$targetDir/mods');
+    
+    if (sourceModsDir.existsSync()) {
+      await _copyDirectory(sourceModsDir, targetModsDir);
+    }
+  }
+  
+  // 复制目录
+  Future<void> _copyDirectory(Directory source, Directory target) async {
+    if (!target.existsSync()) {
+      await target.create(recursive: true);
+    }
+    
+    final entities = source.listSync();
+    for (final entity in entities) {
+      if (entity is File) {
+        final targetFile = File('${target.path}/${entity.path.split(Platform.pathSeparator).last}');
+        await entity.copy(targetFile.path);
+      } else if (entity is Directory) {
+        final targetSubDir = Directory('${target.path}/${entity.path.split(Platform.pathSeparator).last}');
+        await _copyDirectory(entity, targetSubDir);
+      }
+    }
   }
   
   // 获取单个实例

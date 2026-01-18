@@ -1,14 +1,34 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:bamclauncher/theme/blue_archive_theme.dart';
 import 'package:bamclauncher/views/home/home_view.dart';
 import 'package:bamclauncher/services/service_locator.dart';
 import 'package:bamclauncher/services/settings_service.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  // 初始化服务定位器
-  await serviceLocator.initialize();
-  runApp(const BAMCLauncherApp());
+  // 添加异步异常处理
+  runZonedGuarded(() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      
+      // 添加全局异常处理
+      FlutterError.onError = (details) {
+        print('Flutter Error: ${details.exception}');
+        print('Stack Trace: ${details.stack}');
+      };
+      
+      // 初始化服务定位器
+      await serviceLocator.initialize();
+      runApp(const BAMCLauncherApp());
+    } catch (e, stackTrace) {
+      print('Unhandled Exception: $e');
+      print('Stack Trace: $stackTrace');
+    }
+  }, (error, stackTrace) {
+    print('Zone Error: $error');
+    print('Stack Trace: $stackTrace');
+  });
 }
 
 class BAMCLauncherApp extends StatefulWidget {

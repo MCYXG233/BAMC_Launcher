@@ -385,16 +385,20 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
       }
       
       // 显示导入结果
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('导入完成: 成功 $successCount 个, 失败 $failCount 个'),
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('导入完成: 成功 $successCount 个, 失败 $failCount 个'),
+          ),
+        );
+      }
     } catch (e) {
       logE('导入Mod失败:', e);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('导入Mod失败: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('导入Mod失败: $e')),
+        );
+      }
     }
   }
   
@@ -417,13 +421,15 @@ class _InstanceDetailViewState extends State<InstanceDetailView> {
     }).toList();
     
     // 实现资源包管理界面
-    showDialog(
-      context: context,
-      builder: (context) => ResourcePackManagementDialog(
-        instance: _instance!,
-        resourcepacks: resourcepacks.whereType<File>().toList(),
-      ),
-    );
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => ResourcePackManagementDialog(
+          instance: _instance!,
+          resourcepacks: resourcepacks.whereType<File>().toList(),
+        ),
+      );
+    }
   }
   
   // 配置Java

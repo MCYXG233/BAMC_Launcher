@@ -87,10 +87,10 @@ class AnimeCardState extends State<AnimeCard> with SingleTickerProviderStateMixi
             borderRadius: BorderRadius.circular(widget.borderRadius),
             overlayColor: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.hovered)) {
-                return theme.primaryColor.withValues(alpha: 0.1 * 255);
+                return theme.primaryColor.withOpacity(0.1);
               }
               if (states.contains(WidgetState.pressed)) {
-                return theme.primaryColor.withValues(alpha: 0.2 * 255);
+                return theme.primaryColor.withOpacity(0.2);
               }
               return Colors.transparent;
             }),
@@ -122,7 +122,7 @@ class AnimeCardState extends State<AnimeCard> with SingleTickerProviderStateMixi
                         Text(
                           widget.subtitle,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.8 * 255),
+                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -159,13 +159,13 @@ class AnimeCardState extends State<AnimeCard> with SingleTickerProviderStateMixi
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: _isHovered 
-            ? theme.primaryColor.withValues(alpha: 0.1 * 255) 
+            ? theme.primaryColor.withOpacity(0.1) 
             : theme.cardColor,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: _isHovered 
-              ? theme.primaryColor.withValues(alpha: 0.3 * 255) 
-              : theme.dividerColor.withValues(alpha: 0.5 * 255),
+              ? theme.primaryColor.withOpacity(0.3) 
+              : theme.dividerColor.withOpacity(0.5),
           width: 1,
         ),
       ),

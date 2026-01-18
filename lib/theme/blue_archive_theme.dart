@@ -2,57 +2,70 @@ import 'package:flutter/material.dart';
 
 // 蔚蓝档案主题实现
 class BlueArchiveTheme {
-  // 公共常量
-  static const double borderRadiusSmall = 8.0;
-  static const double borderRadiusMedium = 12.0;
-  static const double borderRadiusLarge = 16.0;
-  static const Duration animationDuration = Duration(milliseconds: 250);
-  static const Duration animationDurationSlow = Duration(milliseconds: 350);
+  // 公共常量 - 调整为更适合Windows桌面软件的圆角大小
+  static const double borderRadiusSmall = 4.0;
+  static const double borderRadiusMedium = 8.0;
+  static const double borderRadiusLarge = 12.0;
+  static const double borderRadiusExtraLarge = 16.0;
+  static const Duration animationDuration = Duration(milliseconds: 300);
+  static const Duration animationDurationSlow = Duration(milliseconds: 400);
   static const String fontFamily = 'NotoSansSC';
   
+  // 渐变背景常量
+  static const List<Color> gradientBackgroundLight = [
+    Color(0xFFF0F4FF), // 淡蓝色
+    Color(0xFFFDE6FF), // 淡粉色
+  ];
+  static const List<Color> gradientBackgroundDark = [
+    Color(0xFF0F172A), // 深蓝黑
+    Color(0xFF1E1B4B), // 深紫蓝
+  ];
+  
   // 浅色主题常量
-  // 主色调常量
-  static const Color primaryColorLight = Color(0xFF1E3A8A); // 静谧蓝
-  static const Color primaryLightLight = Color(0xFF60A5FA); // 浅海蓝
-  static const Color primaryDarkLight = Color(0xFF1E40AF); // 深海蓝
-  static const Color primaryContainerLight = Color(0xFF3B82F6); // 晴空蓝
+  // 主色调常量 - 更符合Blue Archive的蓝粉色调
+  static const Color primaryColorLight = Color(0xFF4F46E5); // 蓝紫色
+  static const Color primaryLightLight = Color(0xFF818CF8); // 浅蓝紫
+  static const Color primaryDarkLight = Color(0xFF4338CA); // 深蓝紫
+  static const Color primaryContainerLight = Color(0xFF6366F1); // 中蓝紫
   
-  // 辅助色常量
-  static const Color secondaryColorLight = Color(0xFFF472B6); // 樱花粉
-  static const Color secondaryLightLight = Color(0xFFFBCFE8); // 浅粉
-  static const Color successColorLight = Color(0xFF34D399); // 草绿色
-  static const Color warningColorLight = Color(0xFFF59E0B); // 暖橙色
-  static const Color errorColorLight = Color(0xFFEF4444); // 错误红
+  // 辅助色常量 - 更符合游戏的粉色调
+  static const Color secondaryColorLight = Color(0xFFEC4899); // 亮粉色
+  static const Color secondaryLightLight = Color(0xFFF9A8D4); // 浅粉色
+  static const Color successColorLight = Color(0xFF22C55E); // 绿色
+  static const Color warningColorLight = Color(0xFFEAB308); // 黄色
+  static const Color errorColorLight = Color(0xFFEF4444); // 红色
   
-  // 中性色常量
-  static const Color backgroundColorLight = Color(0xFFF8FAFC); // 月光白
+  // 中性色常量 - 更柔和的色调
+  static const Color backgroundColorLight = Color(0xFFF8FAFC); // 浅灰
   static const Color surfaceColorLight = Color(0xFFFFFFFF); // 纯白
-  static const Color textPrimaryLight = Color(0xFF1F2937); // 深灰
-  static const Color textSecondaryLight = Color(0xFF6B7280); // 星辰灰
-  static const Color textLightLight = Color(0xFF9CA3AF); // 浅灰
-  static const Color borderColorLight = Color(0xFFE5E7EB); // 边框灰
+  static const Color textPrimaryLight = Color(0xFF1E293B); // 深灰
+  static const Color textSecondaryLight = Color(0xFF475569); // 中灰
+  static const Color textLightLight = Color(0xFF94A3B8); // 浅灰
+  static const Color borderColorLight = Color(0xFFE2E8F0); // 边框灰
+  static const Color cardShadowColorLight = Color(0xFFCBD5E1); // 卡片阴影色
   
   // 深色主题常量
-  // 主色调常量
-  static const Color primaryColorDark = Color(0xFF3B82F6); // 晴空蓝
-  static const Color primaryLightDark = Color(0xFF93C5FD); // 浅海蓝
-  static const Color primaryDarkDark = Color(0xFF2563EB); // 深海蓝
-  static const Color primaryContainerDark = Color(0xFF1D4ED8); // 静谧蓝
+  // 主色调常量 - 更符合Blue Archive的深色蓝紫色调
+  static const Color primaryColorDark = Color(0xFF8B5CF6); // 深紫
+  static const Color primaryLightDark = Color(0xFFA78BFA); // 浅紫
+  static const Color primaryDarkDark = Color(0xFF7C3AED); // 深蓝紫
+  static const Color primaryContainerDark = Color(0xFF9333EA); // 中紫
   
-  // 辅助色常量
-  static const Color secondaryColorDark = Color(0xFFF9A8D4); // 樱花粉
-  static const Color secondaryLightDark = Color(0xFFFBCFE8); // 浅粉
-  static const Color successColorDark = Color(0xFF86EFAC); // 草绿色
-  static const Color warningColorDark = Color(0xFFFDE047); // 暖橙色
-  static const Color errorColorDark = Color(0xFFFCA5A5); // 错误红
+  // 辅助色常量 - 更符合游戏的深色粉色调
+  static const Color secondaryColorDark = Color(0xFFEC4899); // 亮粉色
+  static const Color secondaryLightDark = Color(0xFFF472B6); // 中粉色
+  static const Color successColorDark = Color(0xFF10B981); // 绿色
+  static const Color warningColorDark = Color(0xFFFBBF24); // 黄色
+  static const Color errorColorDark = Color(0xFFEF4444); // 红色
   
-  // 中性色常量
-  static const Color backgroundColorDark = Color(0xFF0F172A); // 深海黑
+  // 中性色常量 - 更柔和的深色
+  static const Color backgroundColorDark = Color(0xFF0F172A); // 深蓝黑
   static const Color surfaceColorDark = Color(0xFF1E293B); // 夜空灰
-  static const Color textPrimaryDark = Color(0xFFF1F5F9); // 月光白
-  static const Color textSecondaryDark = Color(0xFFCBD5E1); // 星辰灰
+  static const Color textPrimaryDark = Color(0xFFF8FAFC); // 月光白
+  static const Color textSecondaryDark = Color(0xFFE2E8F0); // 星辰灰
   static const Color textLightDark = Color(0xFF94A3B8); // 浅灰
-  static const Color borderColorDark = Color(0xFF334155); // 边框灰
+  static const Color borderColorDark = Color(0xFF475569); // 边框灰
+  static const Color cardShadowColorDark = Color(0xFF1E293B); // 卡片阴影色
   
   // 浅色主题
   static ThemeData get lightTheme {
@@ -148,11 +161,11 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 应用栏主题
+      // 应用栏主题 - 更适合Windows桌面软件
       appBarTheme: const AppBarTheme(
         backgroundColor: primaryColorLight,
-        elevation: 0.0,
-        shadowColor: Colors.transparent,
+        elevation: 1.0,
+        shadowColor: Colors.black26,
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20.0,
@@ -169,23 +182,21 @@ class BlueArchiveTheme {
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(borderRadiusMedium),
-          ),
+          borderRadius: BorderRadius.zero,
         ),
       ),
       
-      // 按钮主题
+      // 按钮主题 - 更符合Blue Archive的渐变按钮设计
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColorLight,
           foregroundColor: Colors.white,
-          elevation: 0.0,
-          shadowColor: Colors.transparent,
+          elevation: 2.0,
+          shadowColor: primaryColorLight.withOpacity(0.3),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 14.0),
           textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
@@ -205,18 +216,24 @@ class BlueArchiveTheme {
             fontFamily: fontFamily,
           ),
           animationDuration: animationDuration,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusMedium),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         ),
       ),
       
-      // 填充按钮主题
+      // 填充按钮主题 - 更符合游戏的圆角设计
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primaryColorLight,
           foregroundColor: Colors.white,
+          elevation: 2.0,
+          shadowColor: primaryColorLight.withOpacity(0.3),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 14.0),
           textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
@@ -226,15 +243,15 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 卡片主题
+      // 卡片主题 - 更符合Blue Archive的圆润设计
       cardTheme: CardThemeData(
-        elevation: 0.0,
-        shadowColor: Colors.transparent,
+        elevation: 2.0,
+        shadowColor: cardShadowColorLight.withOpacity(0.2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: BorderRadius.circular(borderRadiusLarge),
           side: const BorderSide(color: borderColorLight, width: 1.0),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         color: surfaceColorLight,
       ),
       
@@ -334,7 +351,7 @@ class BlueArchiveTheme {
         activeTrackColor: primaryColorLight,
         inactiveTrackColor: borderColorLight,
         thumbColor: primaryColorLight,
-        overlayColor: primaryLightLight.withValues(alpha: 0.3),
+        overlayColor: primaryLightLight.withOpacity(0.3),
         activeTickMarkColor: primaryColorLight,
         inactiveTickMarkColor: Colors.transparent,
         trackHeight: 4.0,
@@ -411,13 +428,14 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 页面过渡主题
+      // 页面过渡主题 - 使用更符合桌面软件的淡入淡出过渡效果
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          // 所有平台统一使用淡入淡出过渡，更符合桌面软件体验
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
         },
       ),
@@ -541,11 +559,11 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 应用栏主题
+      // 应用栏主题 - 更适合Windows桌面软件
       appBarTheme: const AppBarTheme(
         backgroundColor: primaryColorDark,
-        elevation: 0.0,
-        shadowColor: Colors.transparent,
+        elevation: 1.0,
+        shadowColor: Colors.black26,
         titleTextStyle: TextStyle(
           color: Colors.white,
           fontSize: 20.0,
@@ -562,23 +580,21 @@ class BlueArchiveTheme {
         ),
         centerTitle: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(borderRadiusMedium),
-          ),
+          borderRadius: BorderRadius.zero,
         ),
       ),
       
-      // 按钮主题
+      // 按钮主题 - 更符合Blue Archive的渐变按钮设计
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColorDark,
           foregroundColor: Colors.white,
-          elevation: 0.0,
-          shadowColor: Colors.transparent,
+          elevation: 2.0,
+          shadowColor: primaryColorDark.withOpacity(0.3),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 14.0),
           textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
@@ -598,18 +614,24 @@ class BlueArchiveTheme {
             fontFamily: fontFamily,
           ),
           animationDuration: animationDuration,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusMedium),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         ),
       ),
       
-      // 填充按钮主题
+      // 填充按钮主题 - 更符合游戏的圆角设计
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primaryColorDark,
           foregroundColor: Colors.white,
+          elevation: 2.0,
+          shadowColor: primaryColorDark.withOpacity(0.3),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadiusMedium),
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 14.0),
           textStyle: const TextStyle(
             fontSize: 16.0,
             fontWeight: FontWeight.w600,
@@ -619,15 +641,15 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 卡片主题
+      // 卡片主题 - 更符合Blue Archive的圆润设计
       cardTheme: CardThemeData(
-        elevation: 0.0,
-        shadowColor: Colors.transparent,
+        elevation: 2.0,
+        shadowColor: cardShadowColorDark.withOpacity(0.3),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadiusMedium),
+          borderRadius: BorderRadius.circular(borderRadiusLarge),
           side: const BorderSide(color: borderColorDark, width: 1.0),
         ),
-        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        margin: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         color: surfaceColorDark,
       ),
       
@@ -727,7 +749,7 @@ class BlueArchiveTheme {
         activeTrackColor: primaryColorDark,
         inactiveTrackColor: borderColorDark,
         thumbColor: primaryColorDark,
-        overlayColor: primaryLightDark.withValues(alpha: 0.3),
+        overlayColor: primaryLightDark.withOpacity(0.3),
         activeTickMarkColor: primaryColorDark,
         inactiveTickMarkColor: Colors.transparent,
         trackHeight: 4.0,
@@ -804,13 +826,14 @@ class BlueArchiveTheme {
         ),
       ),
       
-      // 页面过渡主题
+      // 页面过渡主题 - 使用更符合桌面软件的淡入淡出过渡效果
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: ZoomPageTransitionsBuilder(),
-          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          // 所有平台统一使用淡入淡出过渡，更符合桌面软件体验
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
-          TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
         },
       ),
